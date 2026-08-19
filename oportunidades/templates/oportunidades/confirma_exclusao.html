@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Excluir Oportunidade{% endblock %}
+{% block content %}
+<h1>Confirmar exclusão</h1>
+<p>Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmar exclusão</button>
+    <a href="{% url 'oportunidades:lista' %}" class="btn btn-link">Cancelar</a>
+</form>
+{% endblock %}

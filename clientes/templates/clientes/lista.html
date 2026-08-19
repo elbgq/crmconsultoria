@@ -1,0 +1,107 @@
+{% extends 'base.html' %} 
+{% block title %}Empresas Clientes{% endblock %} 
+{%block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Empresas Clientes</h1>
+  <a href="{% url 'clientes:criar' %}" class="btn btn-primary"
+    >+ Nova Empresa</a
+  >
+</div>
+
+<form method="get" class="mb-3">
+  <input
+    type="text"
+    name="busca"
+    class="form-control"
+    placeholder="Buscar por razão social ou nome fantasia"
+    value="{{ request.GET.busca }}"
+  />
+</form>
+
+<div
+  class="alert alert-secondary d-flex justify-content-between align-items-center"
+>
+  <span>Total de empresas cadastradas </span>
+  <span class="badge bg-primary fs-6">{{ paginator.count }}</span>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Razão Social</th>
+      <th>CNPJ</th>
+      <th>Setor</th>
+      <th>Porte</th>
+      <th>Modalidade</th>
+      <th>Website</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for empresa in empresas %}
+    <tr>
+      <td>{{ empresa.razao_social }}</td>
+      <td>{{ empresa.cnpj|default:"-" }}</td>
+      <td>{{ empresa.setor }}</td>
+      <td>{{ empresa.get_porte_display }}</td>
+      <td>{{ empresa.get_modalidade_display }}</td>
+      <td>
+        {% if empresa.website %}
+        <a href="{{ empresa.website }}" target="_blank" rel="noopener"
+          >{{ empresa.website }}</a
+        >
+        {% else %} - {% endif %}
+      </td>
+      <td>
+        <a
+          href="{% url 'clientes:detalhe' empresa.pk %}"
+          class="btn btn-sm btn-outline-primary"
+          >Detalhes</a
+        >
+        <a
+          href="{% url 'clientes:detalhe_contato' empresa.pk %}#contatos"
+          class="btn btn-sm btn-outline-secondary"
+          >Contatos</a
+        >
+        <a
+          href="{% url 'clientes:editar' empresa.pk %}"
+          class="btn btn-sm btn-outline-secondary"
+          >Editar</a
+        >
+        <a
+          href="{% url 'clientes:excluir' empresa.pk %}"
+          class="btn btn-sm btn-outline-danger"
+          >Excluir</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+<nav>
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+        >Anterior</a
+      >
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link"
+        >Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span
+      >
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+        >Próxima</a
+      >
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %} 
+{% endblock %}

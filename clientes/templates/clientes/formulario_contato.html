@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}{% if contato %}Editar{% else %}Novo{% endif %} Contato{% endblock %}
+{% block content %}
+<h1>{% if contato %}Editar Contato{% else %}Novo Contato{% endif %}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    {% if contato %}
+    <a href="{% url 'clientes:detalhe_contato' contato.pk %}" class="btn btn-link">Cancelar</a>
+    {% else %}
+    <a href="{% url 'clientes:lista' %}" class="btn btn-link">Cancelar</a>
+    {% endif %}
+</form>
+{% endblock %}

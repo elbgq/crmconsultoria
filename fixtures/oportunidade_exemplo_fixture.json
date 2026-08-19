@@ -1,0 +1,89 @@
+[
+  {
+    "model": "clientes.empresacliente",
+    "pk": 154,
+    "fields": {
+      "razao_social": "Com\u00e9rcio de Alimentos Bom Pre\u00e7o Ltda",
+      "nome_fantasia": "Bom Pre\u00e7o Supermercados",
+      "cnpj": "12.345.678/0001-90",
+      "setor": "Varejo Aliment\u00edcio",
+      "porte": "media",
+      "website": "https://bompreco-exemplo.com.br",
+      "observacoes": "Rede com 8 lojas na regi\u00e3o metropolitana. Contato inicial via indica\u00e7\u00e3o de outro cliente.",
+      "criado_em": "2026-06-01T09:00:00Z",
+      "atualizado_em": "2026-06-01T09:00:00Z"
+    }
+  },
+  {
+    "model": "clientes.contato",
+    "pk": 2,
+    "fields": {
+      "empresa": 154,
+      "nome": "Marina Ferreira Costa",
+      "cargo": "Diretora Financeira",
+      "email": "marina.costa@bompreco-exemplo.com.br",
+      "telefone": "(51) 99876-5432",
+      "decisor": true,
+      "criado_em": "2026-06-01T09:05:00Z",
+      "atualizado_em": "2026-06-01T09:05:00Z"
+    }
+  },
+  {
+    "model": "oportunidades.oportunidade",
+    "pk": 1,
+    "fields": {
+      "titulo": "Diagn\u00f3stico e Reestrutura\u00e7\u00e3o Financeira \u2014 Bom Pre\u00e7o",
+      "empresa_cliente": 154,
+      "contato_principal": 2,
+      "consultor_responsavel": 3,
+      "area": "financeira",
+      "tipo_contrato": "projeto",
+      "valor_estimado": "85000.00",
+      "horas_estimadas": 320,
+      "valor_hora": "265.63",
+      "probabilidade": 65,
+      "estagio": "negociacao",
+      "origem": "Indica\u00e7\u00e3o de cliente",
+      "data_inicio_prevista": "2026-08-22",
+      "duracao_estimada_semanas": 12,
+      "data_fechamento_real": null,
+      "motivo_perda": "",
+      "observacoes": "Cliente busca reduzir inadimpl\u00eancia e reorganizar fluxo de caixa. Concorrendo com outra consultoria menor, por\u00e9m sem experi\u00eancia no varejo.",
+      "criado_em": "2026-06-01T09:10:00Z",
+      "atualizado_em": "2026-07-15T14:30:00Z"
+    }
+  },
+  {
+    "model": "tarefas.tarefa",
+    "pk": 1,
+    "fields": {
+      "titulo": "Enviar proposta revisada com parcelamento",
+      "descricao": "",
+      "tipo": "email",
+      "prioridade": "alta",
+      "responsavel": 3,
+      "oportunidade": 1,
+      "projeto": null,
+      "data_vencimento": "2026-07-25T17:00:00Z",
+      "concluida": false,
+      "data_conclusao": null,
+      "criado_em": "2026-07-15T14:35:00Z",
+      "atualizado_em": "2026-07-15T14:35:00Z"
+    }
+  },
+  {
+    "model": "interacoes.interacao",
+    "pk": 1,
+    "fields": {
+      "contato": 2,
+      "oportunidade": 1,
+      "responsavel": 3,
+      "tipo": "reuniao",
+      "assunto": "Apresenta\u00e7\u00e3o da proposta comercial",
+      "descricao": "Reuni\u00e3o com Marina e o controller. Pediram ajuste no cronograma de pagamento (parcelamento em 3x).",
+      "data_interacao": "2026-07-15T14:00:00Z",
+      "criado_em": "2026-07-15T14:20:00Z",
+      "atualizado_em": "2026-07-15T14:20:00Z"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Excluir Interação</h1>
+    <p>Tem certeza que deseja excluir a interação <strong>{{ interacao.assunto }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmar</button>
+        <a href="{% url 'clientes:detalhe_contato' interacao.contato.pk %}" class="btn btn-link">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

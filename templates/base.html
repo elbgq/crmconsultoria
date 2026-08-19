@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}CRM Consultoria{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Seu CSS customizado em arquivo separado -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'crm_core:home' %}">CRM Consultoria</a>
+            {% if user.is_authenticated %} 
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="{% url 'clientes:lista' %}">Empresas Clientes</a>
+                <a class="nav-link" href="{% url 'oportunidades:lista' %}">Oportunidades</a>
+                <a class="nav-link" href="{% url 'oportunidades:kanban' %}">Kanban</a>
+                <a class="nav-link" href="{% url 'projetos:lista' %}">Projetos</a>
+                <a class="nav-link" href="{% url 'relatorios:dashboard' %}">Relatórios</a>
+            </div>
+            
+            <div class="navbar-nav dropdown">
+                <a class="nav-link dropdown-toggle text-white-50" href="#" id="userMenu" role="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                    Olá, {{ user.username }}
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+
+                    {% if user.is_superuser %}
+                    <li>
+                        <a class="dropdown-item" href="/admin/">Área Administrativa</a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    {% endif %}
+
+                    <li>
+                        <a class="dropdown-item" href="{% url 'password_change' %}">Alterar senha</a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">Sair</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

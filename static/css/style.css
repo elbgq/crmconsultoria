@@ -1,0 +1,46 @@
+body {
+            background: linear-gradient(135deg, #90bbaa 0%, #919db1 50%, #8d8fb4 100%);
+            min-height: 100vh;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 12px rgba(30, 41, 59, 0.06);
+        }
+
+        .navbar {
+            box-shadow: 0 1px 4px rgba(30, 41, 59, 0.08);
+        }
+        
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.kanban-coluna .card-header {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.6rem;
+}
+
+.kanban-cartao .card-body {
+    padding: 0.5rem 0.6rem !important;
+}
+
+.kanban-cartao .fw-bold {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+/* Em telas menores, volta pro scroll horizontal em vez de espremer demais */
+@media (max-width: 992px) {
+    .kanban-board {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+    }
+    .kanban-coluna {
+        min-width: 220px;
+        flex: 0 0 auto;
+    }
+}

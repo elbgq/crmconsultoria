@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{{ oportunidade.titulo }}{% endblock %}
+{% block content %}
+<h1>{{ oportunidade.titulo }}</h1>
+<p class="text-muted">{{ oportunidade.empresa_cliente }} — <span class="badge bg-info">{{ oportunidade.get_estagio_display }}</span></p>
+
+<dl class="row">
+    <dt class="col-sm-3">Contato principal</dt>
+    <dd class="col-sm-9">
+        {% if oportunidade.contato_principal %}
+            <a href="{% url 'clientes:detalhe_contato' oportunidade.contato_principal.pk %}?next={{ request.path|urlencode }}">
+                {{ oportunidade.contato_principal.nome }}
+            </a>
+        {% else %}
+            —
+        {% endif %}
+    </dd>
+    <dt class="col-sm-3">Consultor responsável</dt><dd class="col-sm-9">{{ oportunidade.consultor_responsavel|default:"—" }}</dd>
+    <dt class="col-sm-3">Área</dt><dd class="col-sm-9">{{ oportunidade.get_area_display }}</dd>
+    <dt class="col-sm-3">Tipo de contrato</dt><dd class="col-sm-9">{{ oportunidade.get_tipo_contrato_display }}</dd>
+    <dt class="col-sm-3">Valor estimado</dt><dd class="col-sm-9">R$ {{ oportunidade.valor_estimado }}</dd>
+    <dt class="col-sm-3">Probabilidade</dt><dd class="col-sm-9">{{ oportunidade.probabilidade }}%</dd>
+    <dt class="col-sm-3">Origem</dt><dd class="col-sm-9">{{ oportunidade.origem|default:"—" }}</dd>
+    <dt class="col-sm-3">Início previsto</dt><dd class="col-sm-9">{{ oportunidade.data_inicio_prevista|default:"—" }}</dd>
+    <dt class="col-sm-3">Fechamento real</dt><dd class="col-sm-9">{{ oportunidade.data_fechamento_real|default:"—" }}</dd>
+    <dt class="col-sm-3">Observações</dt><dd class="col-sm-9">{{ oportunidade.observacoes|linebreaks|default:"—" }}</dd>
+</dl>
+
+<h4>Histórico de estágios</h4>
+<ul class="list-group mb-3">
+    {% for h in oportunidade.historico.all %}
+    <li class="list-group-item">
+        {{ h.estagio_anterior|default:"Início" }} → {{ h.estagio_novo }}
+        <br><small class="text-muted">{{ h.data_mudanca }} — {{ h.alterado_por|default:"—" }}</small>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Sem histórico registrado.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'oportunidades:editar' oportunidade.pk %}" class="btn btn-outline-secondary">Editar</a>
+<a href="{% url 'oportunidades:lista' %}" class="btn btn-link">Voltar</a>
+{% endblock %}

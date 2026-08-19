@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Kanban de Oportunidades{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Funil de Oportunidades</h1>
+
+    <div class="kanban-board">
+    {% for coluna in colunas %}
+    <div class="kanban-coluna">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>{{ coluna.rotulo }}</strong>
+                <span class="badge bg-secondary">{{ coluna.oportunidades|length }}</span>
+            </div>
+            <div class="card-body p-2 kanban-lista" data-estagio="{{ coluna.valor }}" style="min-height: 400px;">
+                {% for op in coluna.oportunidades %}
+                <div class="card mb-2 kanban-cartao" data-id="{{ op.pk }}" style="cursor: grab;">
+                    <div class="card-body p-2">
+                        <div class="fw-bold small">{{ op.titulo }}</div>
+                        <div class="small text-muted">{{ op.empresa_cliente }}</div>
+                        <div class="small">R$ {{ op.valor_estimado|floatformat:0 }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.kanban-lista').forEach(function (lista) {
+        new Sortable(lista, {
+            group: 'kanban',
+            animation: 150,
+            onEnd: function (evento) {
+                const cartao = evento.item;
+                const oportunidadeId = cartao.dataset.id;
+                const novoEstagio = evento.to.dataset.estagio;
+
+                fetch("{% url 'oportunidades:atualizar_estagio_ajax' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': obterCsrfToken(),
+                    },
+                    body: JSON.stringify({ oportunidade_id: oportunidadeId, novo_estagio: novoEstagio }),
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.sucesso) {
+                        alert('Erro ao atualizar. Recarregando.');
+                        location.reload();
+                    }
+                })
+                .catch(() => location.reload());
+            },
+        });
+    });
+
+    function obterCsrfToken() {
+        const nome = 'csrftoken';
+        for (let cookie of document.cookie.split(';')) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(nome + '=')) return cookie.substring(nome.length + 1);
+        }
+        return '';
+    }
+});
+</script>
+{% endblock %}

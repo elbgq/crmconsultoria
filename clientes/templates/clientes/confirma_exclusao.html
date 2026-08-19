@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Excluir Empresa{% endblock %}
+{% block content %}
+<h1>Confirmar exclusão</h1>
+<p>Tem certeza que deseja excluir <strong>{{ object }}</strong>? Essa ação também removerá contatos e oportunidades vinculados.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmar exclusão</button>
+    <a href="{% url 'clientes:lista' %}" class="btn btn-link">Cancelar</a>
+</form>
+{% endblock %}

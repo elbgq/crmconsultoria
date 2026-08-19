@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Início{% endblock %}
+{% block content %}
+<h1 class="mb-4">Visão Geral</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Empresas Clientes</h6>
+                <h2>{{ total_empresas }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Oportunidades em Aberto</h6>
+                <h2>{{ total_oportunidades_abertas }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Valor em Negociação</h6>
+                <h2>R$ {{ valor_em_negociacao }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Por Estágio</h5>
+        <ul class="list-group mb-4">
+            {% for item in por_estagio %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ item.estagio }} <span class="badge bg-secondary">{{ item.total }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h5>Últimas Oportunidades</h5>
+        <ul class="list-group mb-4">
+            {% for op in ultimas_oportunidades %}
+            <li class="list-group-item">
+                <a href="{% url 'oportunidades:detalhe' op.pk %}">{{ op.titulo }}</a>
+                <br><small class="text-muted">{{ op.empresa_cliente }}</small>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">Nenhuma oportunidade ainda.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<a href="{% url 'oportunidades:kanban' %}" class="btn btn-primary">Ver Kanban</a>
+{% endblock %}

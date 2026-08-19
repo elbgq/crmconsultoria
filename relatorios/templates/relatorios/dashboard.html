@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard de Relatórios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard Gerencial</h1>
+
+    <!-- Cards de resumo rápido -->
+    <div class="row mb-4">
+        {% for item in funil %}
+        <div class="col-md-2">
+            <div class="card text-center shadow-sm mb-2">
+                <div class="card-body">
+                    <h6 class="text-muted">{{ item.estagio|title }}</h6>
+                    <h3>{{ item.quantidade }}</h3>
+                    <small>R$ {{ item.valor_total|floatformat:2 }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <!-- Gráfico: Funil de vendas -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">Funil de Vendas</div>
+                <div class="card-body">
+                    <canvas id="graficoFunil"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico: Receita por área -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">Receita por Área de Consultoria</div>
+                <div class="card-body">
+                    <canvas id="graficoArea"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Tabela: Conversão por consultor -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">Conversão por Consultor</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Consultor</th>
+                                <th>Total</th>
+                                <th>Ganhas</th>
+                                <th>Perdidas</th>
+                                <th>Taxa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in conversao %}
+                            <tr>
+                                <td>{{ c.consultor_responsavel__first_name|default:c.consultor_responsavel__username }}</td>
+                                <td>{{ c.total }}</td>
+                                <td>{{ c.ganhas }}</td>
+                                <td>{{ c.perdidas }}</td>
+                                <td>
+                                    {% widthratio c.ganhas c.total 100 %}%
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela: Margem de projetos -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">Margem de Projetos (Horas)</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Projeto</th>
+                                <th>Estimado</th>
+                                <th>Consumido</th>
+                                <th>%</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in margem_projetos %}
+                            <tr class="{% if p.status_margem == 'Alerta' %}table-warning{% endif %}">
+                                <td>{{ p.projeto }}</td>
+                                <td>{{ p.horas_estimadas }}h</td>
+                                <td>{{ p.horas_consumidas }}h</td>
+                                <td>{{ p.percentual_consumido }}%</td>
+                                <td>
+                                    <span class="badge {% if p.status_margem == 'Alerta' %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ p.status_margem }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarefas atrasadas -->
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">Tarefas Atrasadas por Responsável</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Responsável</th>
+                                <th>Quantidade de Tarefas Atrasadas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in tarefas_atrasadas %}
+                            <tr>
+                                <td>{{ t.responsavel__username }}</td>
+                                <td>{{ t.quantidade }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js via CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+    const dadosFunil = JSON.parse('{{ funil_json|escapejs }}');
+    const dadosArea = JSON.parse('{{ receita_area_json|escapejs }}');
+
+    new Chart(document.getElementById('graficoFunil'), {
+        type: 'bar',
+        data: {
+            labels: dadosFunil.map(item => item.estagio),
+            datasets: [{
+                label: 'Quantidade de Oportunidades',
+                data: dadosFunil.map(item => item.quantidade),
+                backgroundColor: '#4e73df'
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    new Chart(document.getElementById('graficoArea'), {
+        type: 'doughnut',
+        data: {
+            labels: dadosArea.map(item => item.area),
+            datasets: [{
+                label: 'Receita por Área',
+                data: dadosArea.map(item => parseFloat(item.receita_total)),
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796']
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+{% endblock %}

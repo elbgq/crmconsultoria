@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}{{ empresa }}{% endblock %}
+{% block content %}
+<h1>{{ empresa.nome_fantasia|default:empresa.razao_social }}</h1>
+<p class="text-muted">{{ empresa.razao_social }} — {{ empresa.get_porte_display }}</p>
+
+<dl class="row">
+    <dt class="col-sm-3">CNPJ</dt><dd class="col-sm-9">{{ empresa.cnpj|default:"—" }}</dd>
+    <dt class="col-sm-3">Setor</dt><dd class="col-sm-9">{{ empresa.setor|default:"—" }}</dd>
+    <dt class="col-sm-3">Website</dt><dd class="col-sm-9">{{ empresa.website|default:"—" }}</dd>
+    <dt class="col-sm-3">Observações</dt><dd class="col-sm-9">{{ empresa.observacoes|linebreaks|default:"—" }}</dd>
+</dl>
+
+<h4 id="contatos">Contatos</h4>
+<ul class="list-group mb-3">
+    {% for contato in empresa.contatos.all %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="{% url 'clientes:detalhe_contato' contato.pk %}?next={{ request.path|urlencode }}">
+            {{ contato.nome }} - {% if contato.decisor %}<span class="badge bg-success">Decisor</span>{% endif %}
+        </a>
+        <small class="text-muted">{{ contato.cargo }}</small>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Nenhum contato cadastrado.</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'clientes:criar_contato' empresa.pk %}" class="btn btn-sm btn-outline-primary mb-3">+ Novo Contato</a>
+
+
+<h4>Oportunidades</h4>
+<ul class="list-group mb-3">
+    {% for op in empresa.oportunidades.all %}
+    <li class="list-group-item">{{ op.titulo }} — {{ op.get_estagio_display }} — R$ {{ op.valor_estimado }}</li>
+    {% empty %}
+    <li class="list-group-item text-muted">Nenhuma oportunidade cadastrada.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'clientes:editar' empresa.pk %}" class="btn btn-outline-secondary">Editar</a>
+<a href="{% url 'clientes:lista' %}" class="btn btn-link">Voltar</a>
+{% endblock %}

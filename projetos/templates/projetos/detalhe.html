@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ projeto.nome }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>{{ projeto.nome }}</h1>
+        <div>
+            <a href="{% url 'projetos:editar_projeto' projeto.pk %}" class="btn btn-outline-secondary">Editar</a>
+            <a href="{% url 'projetos:excluir_projeto' projeto.pk %}" class="btn btn-outline-danger">Excluir</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4"><strong>Cliente:</strong> {{ projeto.oportunidade_origem.empresa_cliente }}</div>
+        <div class="col-md-4"><strong>Status:</strong> {{ projeto.get_status_display }}</div>
+        <div class="col-md-4"><strong>Gerente:</strong> {{ projeto.gerente_projeto|default:"—" }}</div>
+        <div class="col-md-4"><strong>Início real:</strong> {{ projeto.data_inicio_real|default:"—" }}</div>
+        <div class="col-md-4"><strong>Fim previsto:</strong> {{ projeto.data_fim_prevista|default:"—" }}</div>
+        <div class="col-md-4"><strong>Horas:</strong> {{ projeto.horas_consumidas }} / {{ projeto.horas_estimadas|default:"—" }}
+            {% if projeto.percentual_horas_consumidas %} ({{ projeto.percentual_horas_consumidas }}%){% endif %}
+        </div>
+    </div>
+
+    <h4>Equipe</h4>
+    <ul>
+        {% for membro in projeto.equipe.all %}
+        <li>{{ membro.get_full_name|default:membro.username }}</li>
+        {% empty %}
+        <li class="text-muted">Nenhum membro alocado ainda.</li>
+        {% endfor %}
+    </ul>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h4>Entregas</h4>
+        <a href="{% url 'projetos:adicionar_entrega' projeto.pk %}" class="btn btn-sm btn-primary">+ Nova Entrega</a>
+    </div>
+    <table class="table table-sm">
+        <thead>
+            <tr><th>Nome</th><th>Prevista</th><th>Entregue</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for entrega in entregas %}
+            <tr class="{% if entrega.atrasada %}table-danger{% endif %}">
+                <td>{{ entrega.nome }}</td>
+                <td>{{ entrega.data_prevista }}</td>
+                <td>{{ entrega.data_entregue|default:"—" }}</td>
+                <td>
+                    {% if entrega.concluida %}
+                        <span class="badge bg-success">Concluída</span>
+                    {% elif entrega.atrasada %}
+                        <span class="badge bg-danger">Atrasada</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pendente</span>
+                    {% endif %}
+                </td>
+                <td><a href="{% url 'projetos:editar_entrega' projeto.pk entrega.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">Nenhuma entrega cadastrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'projetos:lista' %}" class="btn btn-link">← Voltar para lista</a>
+</div>
+{% endblock %}
