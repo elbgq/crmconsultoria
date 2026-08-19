@@ -4,7 +4,19 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <h1 class="mb-4">Funil de Oportunidades</h1>
+    
+    <h1 class="mb-3">Funil de Oportunidades</h1>
+
+    <button class="btn btn-outline-secondary btn-sm mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#comoUsarKanban" aria-expanded="false" aria-controls="comoUsarKanban">
+        Como usar:
+    </button>
+
+    <div class="collapse mb-3" id="comoUsarKanban">
+        <div class="card card-body">
+            Arraste os cartões entre as colunas para atualizar o estágio da oportunidade.
+            A mudança é salva automaticamente — não é necessário clicar em nenhum botão de confirmação.
+        </div>
+    </div>
 
     <div class="kanban-board">
     {% for coluna in colunas %}
