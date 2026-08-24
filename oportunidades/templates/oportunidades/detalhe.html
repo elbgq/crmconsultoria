@@ -26,6 +26,7 @@
     <dt class="col-sm-3">Observações</dt><dd class="col-sm-9">{{ oportunidade.observacoes|linebreaks|default:"—" }}</dd>
 </dl>
 
+<!-- Seção de Histórico de Estágios -->
 <h4>Histórico de estágios</h4>
 <ul class="list-group mb-3">
     {% for h in oportunidade.historico.all %}
@@ -38,6 +39,73 @@
     {% endfor %}
 </ul>
 
+<!-- Seção de Interações com o Cliente -->
+<h4>Interações com o Cliente</h4>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span></span>
+    <a href="{% url 'interacoes:nova_interacao_oportunidade' oportunidade.pk %}" 
+    class="btn btn-sm btn-primary">
+        + Registrar Interação
+    </a>
+</div>
+
+<ul class="list-group mb-3">
+    {% for interacao in oportunidade.interacoes.all %}
+    <li class="list-group-item">
+        <strong>{{ interacao.get_tipo_display }}</strong>
+        <br>
+        <small class="text-muted">
+            {{ interacao.data }} — {{ interacao.responsavel|default:"—" }}
+        </small>
+        <p class="mt-2">{{ interacao.descricao|linebreaks }}</p>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Nenhuma interação registrada.</li>
+    {% endfor %}
+</ul>
+
+<!-- Seção de Tarefas de oportunidades -->
+<h4>Tarefas desta Oportunidade</h4>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span></span>
+    <a href="{% url 'tarefas:tarefa_nova' %}?oportunidade={{ oportunidade.pk }}" 
+    class="btn btn-sm btn-primary">
+        + Nova Tarefa
+    </a>
+</div>
+
+<ul class="list-group mb-3">
+    {% for tarefa in oportunidade.tarefas.all %}
+    <li class="list-group-item d-flex justify-content-between align-items-center 
+            {% if tarefa.atrasada and not tarefa.concluida %}list-group-item-danger{% endif %}">
+        <div>
+            <strong>{{ tarefa.titulo }}</strong><br>
+            <small class="text-muted">
+                Vencimento: {{ tarefa.data_vencimento }} — 
+                {{ tarefa.get_prioridade_display }}
+            </small>
+        </div>
+
+        <div>
+            {% if tarefa.concluida %}
+                <span class="badge bg-success">Concluída</span>
+            {% else %}
+                <a href="{% url 'tarefas:tarefa_concluir' tarefa.pk %}" 
+                class="btn btn-sm btn-success">Concluir</a>
+            {% endif %}
+            <a href="{% url 'tarefas:tarefa_editar' tarefa.pk %}" 
+            class="btn btn-sm btn-outline-secondary">Editar</a>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Nenhuma tarefa cadastrada.</li>
+    {% endfor %}
+</ul>
+
 <a href="{% url 'oportunidades:editar' oportunidade.pk %}" class="btn btn-outline-secondary">Editar</a>
 <a href="{% url 'oportunidades:lista' %}" class="btn btn-link">Voltar</a>
+<br>
+<br>
 {% endblock %}

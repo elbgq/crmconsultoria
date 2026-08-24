@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>{{ projeto.nome }}</h1>
+        <h1>{{ projeto.nome }} - Detalhes</h1>
         <div>
             <a href="{% url 'projetos:editar_projeto' projeto.pk %}" class="btn btn-outline-secondary">Editar</a>
             <a href="{% url 'projetos:excluir_projeto' projeto.pk %}" class="btn btn-outline-danger">Excluir</a>
@@ -30,14 +30,73 @@
         <li class="text-muted">Nenhum membro alocado ainda.</li>
         {% endfor %}
     </ul>
+    
+    <!-- Adicionando uma seção de esclarecimento sobre entregas -->
+    <div class="accordion mb-3" id="accordionEntregaInfo">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingInfo">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+            Esclarecimentos - Como registrar a conclusão das fases do projeto
+        </button>
+        </h2>
+        <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionEntregaInfo">
+        <div class="accordion-body">
+            <p><strong>Importante:</strong> Cada fase do projeto é representada por uma <em>Entrega</em>. Para concluir uma fase, siga estes passos:</p>
 
+            <ol>
+            <li>Clique no botão <strong>Editar</strong> da entrega correspondente.</li>
+            <li>Marque a opção <strong>Concluída</strong>.</li>
+            <li>Informe a <strong>Data de Entrega</strong> (data em que a fase foi finalizada).</li>
+            <li>Salve as alterações.</li>
+            </ol>
+
+            <p>Ao salvar, o sistema irá automaticamente:</p>
+            <ul>
+            <li>Atualizar o <strong>progresso do projeto</strong>;</li>
+            <li>Recalcular o <strong>status automático</strong> (Em andamento, Concluído, Atrasado);</li>
+            <li>Atualizar a <strong>barra de progresso</strong>;</li>
+            <li>Remover alertas de atraso da fase (se houver).</li>
+            </ul>
+
+            <p><strong>Observação:</strong> Não crie uma nova entrega para marcar conclusão. A conclusão deve ser registrada diretamente na entrega existente.</p>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Seção de alertas automáticos sobre entregas -->
+    {% if projeto.fases_atrasadas %}
+        <div class="alert alert-danger">
+            ⚠ {{ projeto.fases_atrasadas.count }} fase(s) atrasada(s)
+        </div>
+    {% endif %}
+
+    {% if projeto.fases_pendentes %}
+        <div class="alert alert-warning">
+            ⏳ {{ projeto.fases_pendentes.count }} fase(s) pendente(s)
+        </div>
+    {% endif %}
+
+    {% if projeto.fases_concluidas %}
+        <div class="alert alert-success">
+            ✔ {{ projeto.fases_concluidas.count }} fase(s) concluída(s)
+        </div>
+    {% endif %}
+
+
+    <!-- Seção de entregas -->
     <div class="d-flex justify-content-between align-items-center mt-4">
         <h4>Entregas</h4>
         <a href="{% url 'projetos:adicionar_entrega' projeto.pk %}" class="btn btn-sm btn-primary">+ Nova Entrega</a>
     </div>
     <table class="table table-sm">
         <thead>
-            <tr><th>Nome</th><th>Prevista</th><th>Entregue</th><th>Status</th><th></th></tr>
+            <tr><th>Nome</th>
+                <th>Prevista</th>
+                <th>Entregue</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
         </thead>
         <tbody>
             {% for entrega in entregas %}
@@ -47,20 +106,34 @@
                 <td>{{ entrega.data_entregue|default:"—" }}</td>
                 <td>
                     {% if entrega.concluida %}
-                        <span class="badge bg-success">Concluída</span>
+                        <span class="badge bg-success">✔ Concluída</span>
                     {% elif entrega.atrasada %}
-                        <span class="badge bg-danger">Atrasada</span>
+                        <span class="badge bg-danger">⚠ Atrasada</span>
                     {% else %}
-                        <span class="badge bg-warning">Pendente</span>
+                        <span class="badge bg-warning">⏳ Pendente</span>
                     {% endif %}
                 </td>
-                <td><a href="{% url 'projetos:editar_entrega' projeto.pk entrega.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+                <td>
+
+                    <a href="{% url 'projetos:editar_entrega' projeto.pk entrega.pk %}" class="btn btn-sm btn-outline-secondary">
+                    Editar</a>
+                    
+                </td>
             </tr>
             {% empty %}
             <tr><td colspan="5" class="text-center text-muted">Nenhuma entrega cadastrada.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+    <!-- Adicionando a barra de progresso do projeto -->
+    <div class="progress mb-3">
+        <div class="progress-bar" role="progressbar"
+            style="width: {{ projeto.progresso }}%;"
+            aria-valuenow="{{ projeto.progresso }}" aria-valuemin="0" aria-valuemax="100">
+            {{ projeto.progresso }}%
+        </div>
+    </div>
+
 
     <a href="{% url 'projetos:lista' %}" class="btn btn-link">← Voltar para lista</a>
 </div>

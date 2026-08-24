@@ -1,0 +1,45 @@
+{% extends 'base.html' %} 
+{% load static %}
+{% block title %}Minhas Tarefas{% endblock %} 
+{%block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Minhas Tarefas</h2>
+  <a href="{% url 'tarefa_nova' %}" class="btn btn-primary"
+    >+ Nova Tarefa</a
+  >
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Vencimento</th>
+            <th>Prioridade</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tarefa in object_list %}
+        <tr class="{% if tarefa.atrasada %}table-danger{% endif %}">
+            <td>{{ tarefa.titulo }}</td>
+            <td>{{ tarefa.data_vencimento }}</td>
+            <td>{{ tarefa.get_prioridade_display }}</td>
+            <td>
+                {% if tarefa.concluida %}
+                    Concluída
+                {% else %}
+                    Pendente
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'tarefa_editar' tarefa.pk %}" class="btn btn-sm btn-secondary">Editar</a>
+                {% if not tarefa.concluida %}
+                <a href="{% url 'tarefa_concluir' tarefa.pk %}" class="btn btn-sm btn-success">Concluir</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

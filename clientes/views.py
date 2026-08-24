@@ -7,6 +7,7 @@ from .forms import EmpresaClienteForm, ContatoForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.http import JsonResponse
 
 
 class EmpresaClienteListView(LoginRequiredMixin, ListView):
@@ -96,3 +97,15 @@ def excluir_contato(request, pk):
         messages.success(request, 'Contato excluído.')
         return redirect('clientes:detalhe', pk=empresa_pk)
     return render(request, 'clientes/confirma_exclusao_contato.html', {'contato': contato})
+
+
+@login_required
+def contatos_por_empresa(request):
+    empresa_id = request.GET.get('empresa_id')
+    contatos = Contato.objects.filter(empresa_id=empresa_id).order_by('nome') if empresa_id else Contato.objects.none()
+    data = [{'id': c.id, 'nome': str(c)} for c in contatos]
+    return JsonResponse(data, safe=False)
+
+# def contatos_por_empresa(request, empresa_id):
+#    contatos = Contato.objects.filter(empresa_id=empresa_id).values('id', 'nome')
+#    return JsonResponse(list(contatos), safe=False)

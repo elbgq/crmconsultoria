@@ -59,3 +59,21 @@ class HistoricoEstagio(models.Model):
     def __str__(self):
         return f"{self.oportunidade.titulo}: {self.estagio_anterior} → {self.estagio_novo}"
     
+    def save(self, *args, **kwargs):
+        criando = self.pk is None  # só cria projeto na primeira gravação do histórico
+        super().save(*args, **kwargs)
+
+        # Se o novo estágio é "ganho", cria o projeto
+        if criando and self.estagio_novo == 'ganho':
+            oportunidade = self.oportunidade
+
+            # Evita duplicação
+            if not hasattr(oportunidade, 'projeto'):
+                from projetos.models import ProjetoConsultoria, StatusProjeto
+
+                ProjetoConsultoria.objects.create(
+                    oportunidade_origem=oportunidade,
+                    nome=f"Projeto — {oportunidade.titulo}",
+                    status=StatusProjeto.NAO_INICIADO,
+                    data_inicio_real=oportunidade.data_fechamento_real or None
+                )

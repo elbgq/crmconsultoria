@@ -28,12 +28,25 @@ class TipoInteracao(models.TextChoices):
 # for excluído, não faz sentido manter interações "órfãs" sem ninguém para vincular.
 
 class Interacao(ModeloBase):
-    contato = models.ForeignKey(Contato, on_delete=models.CASCADE, related_name='interacoes')
-    oportunidade = models.ForeignKey(
-        Oportunidade, on_delete=models.SET_NULL, null=True, blank=True, related_name='interacoes'
+    contato = models.ForeignKey(
+        Contato,
+        on_delete=models.CASCADE,
+        related_name='interacoes'
     )
+
+    oportunidade = models.ForeignKey(
+        Oportunidade,
+        on_delete=models.SET_NULL,   # mantém interação mesmo se oportunidade for apagada
+        null=True,
+        blank=True,
+        related_name='interacoes'
+    )
+
     responsavel = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='interacoes'
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='interacoes'
     )
 
     tipo = models.CharField(max_length=20, choices=TipoInteracao.choices)
@@ -46,9 +59,9 @@ class Interacao(ModeloBase):
         verbose_name_plural = "Interações"
         ordering = ['-data_interacao']
         indexes = [
-            models.Index(fields=['contato', '-data_interacao']),
-            models.Index(fields=['oportunidade', '-data_interacao']),
+            models.Index(fields=['contato', 'data_interacao']),
+            models.Index(fields=['oportunidade', 'data_interacao']),
         ]
 
     def __str__(self):
-        return f"{self.get_tipo_display()} — {self.contato} ({self.data_interacao:%d/%m/%Y})"
+        return f"{self.get_tipo_display()} — {self.contato} ({self.data_interacao:%d/%m/%Y})" # type: ignore

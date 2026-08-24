@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import ProjetoConsultoria, Entrega
 from .forms import ProjetoConsultoriaForm, EntregaForm
+from django.utils import timezone
+
 
 # Observação: não incluí criar_projeto como view separada porque, lembra do signal que fizemos?
 # O projeto é criado automaticamente quando a oportunidade vira "Ganho". Faz sentido manter assim
@@ -27,7 +29,7 @@ def lista_projetos(request):
 @login_required
 def detalhe_projeto(request, pk):
     projeto = get_object_or_404(ProjetoConsultoria, pk=pk)
-    entregas = projeto.entregas.all()
+    entregas = projeto.entregas.all() # type: ignore
     contexto = {'projeto': projeto, 'entregas': entregas}
     return render(request, 'projetos/detalhe.html', contexto)
 
@@ -86,3 +88,11 @@ def editar_entrega(request, projeto_pk, entrega_pk):
     else:
         form = EntregaForm(instance=entrega)
     return render(request, 'projetos/entrega_form.html', {'form': form, 'projeto': entrega.projeto})
+
+# Para o botão de concluir uma entrega/fase.
+def concluir_entrega(request, entrega_id):
+    entrega = get_object_or_404(Entrega, id=entrega_id)
+    entrega.concluida = True
+    entrega.data_entregue = timezone.now().date()
+    entrega.save()
+    return redirect('projetos:detalhe', pk=entrega.projeto.id)

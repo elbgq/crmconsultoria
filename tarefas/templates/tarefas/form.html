@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    {% if view.object %}
+        Editar Tarefa
+    {% else %}
+        Nova Tarefa
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <!-- Mostra o título da página -->
+    {% if view.object %}
+        <h1>Editar Tarefa</h1>
+    {% else %}
+        <h1>Nova Tarefa</h1>
+    {% endif %}
+
+    <!-- Mostra o vínculo com a oportunidade ou projeto -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if oportunidade %}
+        <p class="text-muted">
+            Vinculada à oportunidade: <strong>{{ oportunidade.titulo }}</strong>
+        </p>
+    {% elif projeto %}
+        <p class="text-muted">
+            Vinculada ao projeto: <strong>{{ projeto.nome }}</strong>
+        </p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            {{ form.titulo.label_tag }}
+            {{ form.titulo }}
+        </p>
+
+        <p>
+            {{ form.descricao.label_tag }}
+            {{ form.descricao }}
+        </p>
+
+        <p>
+            {{ form.tipo.label_tag }}
+            {{ form.tipo }}
+        </p>
+
+        <p>
+            {{ form.prioridade.label_tag }}
+            {{ form.prioridade }}
+        </p>
+ 
+        <p>
+            {{ form.data_vencimento.label_tag }}
+            {{ form.data_vencimento }}
+        </p>
+
+        {{ form.oportunidade }}
+        {{ form.projeto }}
+
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+
+        {% if form.initial.oportunidade %}
+            <a href="{% url 'oportunidades:detalhe' form.initial.oportunidade %}" class="btn btn-link">Cancelar</a>
+        {% elif form.initial.projeto %}
+            <a href="{% url 'projetos:detalhe_projeto' form.initial.projeto %}" class="btn btn-link">Cancelar</a>
+        {% else %}
+            <a href="/" class="btn btn-link">Cancelar</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

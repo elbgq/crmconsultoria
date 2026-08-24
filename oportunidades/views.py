@@ -48,6 +48,17 @@ class OportunidadeCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView
     success_url = reverse_lazy('oportunidades:lista')
     success_message = "Oportunidade criada com sucesso."
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        empresa_id = self.request.GET.get('empresa_cliente') or self.request.POST.get('empresa_cliente')
+        
+        if empresa_id:
+            from clientes.models import EmpresaCliente
+            try:
+                kwargs['empresa'] = EmpresaCliente.objects.get(pk=empresa_id)
+            except EmpresaCliente.DoesNotExist:
+                kwargs['empresa'] = None
+        return kwargs
 
 class OportunidadeUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Oportunidade
@@ -56,7 +67,11 @@ class OportunidadeUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView
     success_url = reverse_lazy('oportunidades:lista')
     success_message = "Oportunidade atualizada com sucesso."
 
-
+    def get_form_kwargs(self):
+            kwargs = super().get_form_kwargs() # type: ignore
+            kwargs['empresa'] = self.object.empresa_cliente # type: ignore
+            return kwargs
+        
 class OportunidadeDeleteView(LoginRequiredMixin, DeleteView):
     model = Oportunidade
     template_name = 'oportunidades/confirma_exclusao.html'
@@ -154,7 +169,6 @@ def kanban_oportunidades(request):
 @require_POST
 @login_required
 def atualizar_estagio_ajax(request):
-    """Recebe o ID da oportunidade e o novo estágio via AJAX (fetch)."""
     try:
         dados = json.loads(request.body)
         oportunidade_id = dados.get('oportunidade_id')
@@ -167,7 +181,18 @@ def atualizar_estagio_ajax(request):
         return JsonResponse({'erro': 'Estágio inválido'}, status=400)
 
     oportunidade = get_object_or_404(Oportunidade, pk=oportunidade_id)
-    oportunidade.estagio = novo_estagio
-    oportunidade.save()  # o signal de HistoricoEstagio dispara automaticamente aqui
+    estagio_anterior = oportunidade.estagio
+
+    if estagio_anterior != novo_estagio:
+        oportunidade.estagio = novo_estagio
+        oportunidade.save()
+
+        # CRIA O HISTÓRICO - avanço ou regresso de estágio
+        HistoricoEstagio.objects.create(
+            oportunidade=oportunidade,
+            estagio_anterior=estagio_anterior,
+            estagio_novo=novo_estagio,
+            alterado_por=request.user
+        )
 
     return JsonResponse({'sucesso': True, 'novo_estagio': novo_estagio})

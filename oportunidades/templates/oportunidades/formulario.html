@@ -1,9 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Oportunidade{% endblock %}
+{% block title %}
+    {% if object %}
+        Editar
+    {% else %}
+        Nova
+    {% endif %} 
+    Oportunidade
+{% endblock %}
 {% block content %}
 <h1>{% if object %}Editar{% else %}Nova{% endif %} Oportunidade</h1>
 <form method="post">
     {% csrf_token %}
+    <!-- Renderizando os campos do formulário -->
     {% for field in form %}
     <div class="mb-3">
         <label class="form-label">{{ field.label }}</label>
@@ -11,7 +19,64 @@
         {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
     </div>
     {% endfor %}
+
+    <!-- Campo de motivo de perda, visível apenas se o estágio for "perdido" -->
+    {% if form.instance.estagio == 'perdido' %}
+    <div class="mb-3">
+        <label for="id_motivo_perda" class="form-label">Motivo da perda</label>
+        <select name="motivo_perda" id="id_motivo_perda" class="form-select" required>
+            <option value="">Selecione...</option>
+            <option value="concorrencia">Concorrência</option>
+            <option value="preco">Preço</option>
+            <option value="prazo">Prazo</option>
+            <option value="escopo">Escopo inadequado</option>
+            <option value="desinteresse">Cliente perdeu interesse</option>
+        </select>
+    </div>
+    {% endif %}
+
     <button type="submit" class="btn btn-primary">Salvar</button>
     <a href="{% url 'oportunidades:lista' %}" class="btn btn-link">Cancelar</a>
 </form>
+    <!-- JavaScript para atualizar os contatos com base na empresa selecionada -->
+    {% block extra_js %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const empresaSelect = document.getElementById('id_empresa_cliente');
+        const contatoSelect = document.getElementById('id_contato_principal');
+        const contatoSelecionadoAtual = "{{ form.instance.contato_principal_id|default_if_none:'' }}";
+
+        function carregarContatos(empresaId, contatoSelecionado) {
+            contatoSelect.innerHTML = '<option value="">---------</option>';
+
+            if (!empresaId) return;
+
+            fetch(`{% url 'clientes:ajax_contatos_por_empresa' %}?empresa_id=${empresaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(contato => {
+                        const option = document.createElement('option');
+                        option.value = contato.id;
+                        option.textContent = contato.nome;
+                        if (String(contato.id) === String(contatoSelecionado)) {
+                            option.selected = true;
+                        }
+                        contatoSelect.appendChild(option);
+                    });
+                });
+        }
+
+        // Ao trocar a empresa, recarrega os contatos (sem manter seleção anterior)
+        empresaSelect.addEventListener('change', function () {
+            carregarContatos(this.value, null);
+        });
+
+        // Ao carregar a página (edição ou POST com erro), popula os contatos já filtrados
+        if (empresaSelect.value) {
+            carregarContatos(empresaSelect.value, contatoSelecionadoAtual);
+        }
+    });
+    </script>
+    {% endblock %}
+
 {% endblock %}

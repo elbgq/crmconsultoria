@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from crm_core.models import ModeloBase
 from oportunidades.models import Oportunidade
+from django.utils import timezone
 
 
 class StatusProjeto(models.TextChoices):
@@ -30,11 +31,11 @@ class ProjetoConsultoria(ModeloBase):
     data_fim_real = models.DateField(null=True, blank=True)
 
     horas_estimadas = models.PositiveIntegerField(null=True, blank=True)
-    horas_consumidas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    horas_consumidas = models.DecimalField(max_digits=8, decimal_places=2, default=None, null=True, blank=True)
 
     observacoes = models.TextField(blank=True)
 
-    class Meta:
+    class Meta: # type: ignore
         verbose_name = "Projeto de Consultoria"
         verbose_name_plural = "Projetos de Consultoria"
         ordering = ['-criado_em']
@@ -44,13 +45,58 @@ class ProjetoConsultoria(ModeloBase):
         ]
 
     def __str__(self):
-        return f"{self.nome} ({self.oportunidade_origem.empresa_cliente})"
+        return f"{self.nome} ({self.oportunidade_origem.empresa_cliente})" # type: ignore
 
+    # Propriedade que calcula o percentual de horas consumidas em relação às horas estimadas
     @property
     def percentual_horas_consumidas(self):
         if not self.horas_estimadas:
             return None
-        return round((float(self.horas_consumidas) / self.horas_estimadas) * 100, 1)
+        return round((float(self.horas_consumidas) / self.horas_estimadas) * 100, 1)         # type: ignore
+
+    # Propriedade que calcula o progresso do projeto com base nas entregas
+    @property
+    def progresso(self):
+        total = self.entregas.count() # type: ignore
+        if total == 0:
+            return 0
+        concluidas = self.entregas.filter(concluida=True).count() # type: ignore
+        return round((concluidas / total) * 100, 1)
+    
+    # Propriedade que calcula o status automático do projeto com base nas entregas
+    @property
+    def status_automatico(self):
+        total = self.entregas.count() # type: ignore
+        concluidas = self.entregas.filter(concluida=True).count() # type: ignore
+        atrasadas = self.entregas.filter(concluida=False, data_prevista__lt=timezone.now().date()).count() # type: ignore
+
+        if total == 0:
+            return "Não Iniciado"
+        if concluidas == total:
+            return "Concluído"
+        if atrasadas > 0:
+            return "Atrasado"
+        return "Em Andamento"
+    
+    # Para alertas automáticos das entregas/fases no detalhe do projeto.
+    @property
+    def fases_atrasadas(self):
+        return self.entregas.filter( # type: ignore
+            concluida=False,
+            data_prevista__lt=timezone.now().date()
+        )
+
+    @property
+    def fases_pendentes(self):
+        return self.entregas.filter( # type: ignore
+            concluida=False,
+            data_prevista__gte=timezone.now().date()
+        )
+
+    @property
+    def fases_concluidas(self):
+        return self.entregas.filter(concluida=True) # type: ignore
+
 
 
 class Entrega(ModeloBase):

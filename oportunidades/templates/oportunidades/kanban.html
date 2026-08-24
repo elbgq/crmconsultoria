@@ -33,6 +33,18 @@
                         <div class="fw-bold small">{{ op.titulo }}</div>
                         <div class="small text-muted">{{ op.empresa_cliente }}</div>
                         <div class="small">R$ {{ op.valor_estimado|floatformat:0 }}</div>
+
+                        <!-- Botão para ver o projeto associado, se houver -->
+                        {% if coluna.valor == "ganho" and op.projeto %}
+                            <a href="{% url 'projetos:detalhe' op.projeto.pk %}"
+                            class="btn btn-success btn-sm mt-2 w-100">
+                                Ver Projeto
+                            </a>
+                        
+                        {% elif coluna.valor == "ganho" %}
+                            <span class="text-muted small d-block mt-2">Projeto ainda não criado</span>
+                        {% endif %}
+
                     </div>
                 </div>
                 {% endfor %}

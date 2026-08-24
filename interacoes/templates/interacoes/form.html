@@ -1,14 +1,62 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Registrar Interação{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Interação — {{ contato.nome }}</h1>
+   {% if contato %}
+        <h1>Interação — {{ contato.nome }}</h1>
+    {% elif oportunidade %}
+        <h1>Interação — {{ oportunidade.titulo }}</h1>
+    {% else %}
+        <h1>Interação</h1>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <p>
+            {{ form.contato.label_tag }}
+            {{ form.contato }}
+        </p>
+
+        <p>
+            {{ form.tipo.label_tag }}
+            {{ form.tipo }}
+        </p>
+
+        <p>
+            {{ form.assunto.label_tag }}
+            {{ form.assunto }}
+        </p>
+
+        <p>
+            {{ form.descricao.label_tag }}
+            {{ form.descricao }}
+        </p>
+
+        <p>
+            {{ form.data_interacao.label_tag }}
+            {{ form.data_interacao }}
+        </p>
+
+
+        {% if not view.object %}
+            <p class="text-muted">Nova interação — data atual sugerida</p>
+        {% else %}
+            <p class="text-muted">
+                Data atual: {{ form.data_interacao.value|date:"d/m/Y H:i" }}
+            </p>
+        {% endif %}
+
         <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="{% url 'clientes:detalhe_contato' contato.pk %}" class="btn btn-link">Cancelar</a>
+        {% if contato %}
+            <a href="{% url 'clientes:detalhe_contato' contato.pk %}" class="btn btn-link">Cancelar</a>
+        {% elif oportunidade %}
+            <a href="{% url 'oportunidades:detalhe' oportunidade.pk %}" class="btn btn-link">Cancelar</a>
+        {% else %}
+            <a href="/" class="btn btn-link">Cancelar</a>
+        {% endif %}
+
     </form>
 </div>
 {% endblock %}

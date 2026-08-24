@@ -16,4 +16,5 @@ urlpatterns = [
     path('empresa/<int:empresa_pk>/contatos/novo/', views.criar_contato, name='criar_contato'),
     path('contatos/<int:pk>/editar/', views.editar_contato, name='editar_contato'),
     path('contatos/<int:pk>/excluir/', views.excluir_contato, name='excluir_contato'),
+    path('ajax/contatos-por-empresa/', views.contatos_por_empresa, name='ajax_contatos_por_empresa'),
 ]

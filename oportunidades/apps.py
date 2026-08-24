@@ -5,5 +5,6 @@ class OportunidadesConfig(AppConfig):
     name = 'oportunidades'
 
     def ready(self):
-        from .models import Oportunidade, HistoricoEstagio  # ✅ import só aqui dentro
+        from .models import Oportunidade, HistoricoEstagio 
+        import oportunidades.signals  # ✅ import só aqui dentro
         # se for para registrar signals, é aqui que deve ficar
