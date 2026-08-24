@@ -31,7 +31,8 @@ class Tarefa(ModeloBase):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='tarefas')
     # Vínculos opcionais — uma tarefa pertence a UM dos dois (ou a nenhum)
     oportunidade = models.ForeignKey(
-        Oportunidade, on_delete=models.CASCADE, null=True, blank=True, related_name='tarefas')
+        Oportunidade, on_delete=models.CASCADE, null=False, blank=False, related_name='tarefas'
+    )
     projeto = models.ForeignKey(
         ProjetoConsultoria, on_delete=models.CASCADE, null=True, blank=True, related_name='tarefas')
     data_vencimento = models.DateTimeField()

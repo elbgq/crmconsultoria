@@ -5,6 +5,13 @@ from clientes.models import EmpresaCliente, Contato
 
 
 class Oportunidade(ModeloBase):
+    class MotivoPerda(models.TextChoices):
+        CONCORRENCIA = 'concorrencia', 'Concorrência'
+        PRECO = 'preco', 'Preço'
+        PRAZO = 'prazo', 'Prazo'
+        ESCOPO = 'escopo', 'Escopo inadequado'
+        DESINTERESSE = 'desinteresse', 'Cliente perdeu interesse'
+    
     titulo = models.CharField(max_length=200)
     empresa_cliente = models.ForeignKey(EmpresaCliente, on_delete=models.CASCADE, related_name='oportunidades')
     contato_principal = models.ForeignKey(Contato, on_delete=models.SET_NULL, null=True, blank=True)
@@ -27,7 +34,7 @@ class Oportunidade(ModeloBase):
     duracao_estimada_semanas = models.PositiveIntegerField(null=True, blank=True)
     data_fechamento_real = models.DateField(null=True, blank=True)
 
-    motivo_perda = models.CharField(max_length=200, blank=True)
+    motivo_perda = models.CharField(max_length=30, null=True, blank=True, choices=MotivoPerda.choices)
     observacoes = models.TextField(blank=True)
 
     class Meta: # type: ignore

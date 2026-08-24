@@ -73,7 +73,7 @@
         {% elif form.initial.projeto %}
             <a href="{% url 'projetos:detalhe_projeto' form.initial.projeto %}" class="btn btn-link">Cancelar</a>
         {% else %}
-            <a href="/" class="btn btn-link">Cancelar</a>
+            <a href="{% url 'tarefas:lista' %}" class="btn btn-link">Cancelar</a>
         {% endif %}
     </form>
 </div>

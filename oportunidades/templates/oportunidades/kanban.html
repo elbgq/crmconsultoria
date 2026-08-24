@@ -53,37 +53,68 @@
     </div>
     {% endfor %}
 </div>
-</div>
 
+<!-- MODAL DE MOTIVO DA PERDA -->
+<div class="modal fade" id="modalMotivoPerda" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Registrar motivo da perda</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="formMotivoPerda">
+        {% csrf_token %}
+        <input type="hidden" name="oportunidade_id" id="modal-oportunidade-id">
+
+        <div class="modal-body">
+            <p>Informe o motivo da perda:</p>
+
+            <select name="motivo_perda" id="motivo_perda" class="form-select" required>
+                {% for valor, rotulo in motivos_perda %}
+                    <option value="{{ valor }}">{{ rotulo }}</option>
+                {% endfor %}
+
+            </select>
+        </div>
+
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Confirmar perda</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+ 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+
+<!-- Inclua o Bootstrap JS se ainda não estiver incluído -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.kanban-lista').forEach(function (lista) {
         new Sortable(lista, {
             group: 'kanban',
             animation: 150,
+
             onEnd: function (evento) {
                 const cartao = evento.item;
                 const oportunidadeId = cartao.dataset.id;
                 const novoEstagio = evento.to.dataset.estagio;
+                const colunaOrigem = evento.from;
+                
 
-                fetch("{% url 'oportunidades:atualizar_estagio_ajax' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': obterCsrfToken(),
-                    },
-                    body: JSON.stringify({ oportunidade_id: oportunidadeId, novo_estagio: novoEstagio }),
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.sucesso) {
-                        alert('Erro ao atualizar. Recarregando.');
-                        location.reload();
-                    }
-                })
-                .catch(() => location.reload());
+                if (novoEstagio === "perdido") {
+                    abrirModalMotivoPerda(oportunidadeId, cartao, colunaOrigem);
+                    return; // impede salvar automático
+                }
+
+                salvarEstagio(oportunidadeId, novoEstagio);
             },
+
         });
     });
 
@@ -95,6 +126,61 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return '';
     }
+
+    function abrirModalMotivoPerda(oportunidadeId) {
+        document.getElementById("modal-oportunidade-id").value = oportunidadeId;
+
+        // Se o usuário cancelar, devolve o cartão para a coluna original
+        const modalEl = document.getElementById("modalMotivoPerda");
+        modalEl.addEventListener("hidden.bs.modal", function () {
+            colunaOrigem.appendChild(cartao);
+        }, { once: true });
+
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function salvarEstagio(oportunidadeId, novoEstagio, motivoPerda=null) {
+        fetch("{% url 'oportunidades:atualizar_estagio_ajax' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': obterCsrfToken(),
+            },
+            body: JSON.stringify({
+                oportunidade_id: oportunidadeId,
+                novo_estagio: novoEstagio,
+                motivo_perda: motivoPerda
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.sucesso) {
+                alert('Erro ao atualizar. Recarregando.');
+                location.reload();
+            }
+        })
+        .catch(() => location.reload());
+    }
+
+    document.getElementById("formMotivoPerda").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const oportunidadeId = document.getElementById("modal-oportunidade-id").value;
+        const motivo = document.getElementById("motivo_perda").value;
+
+        if (!motivo) {
+            alert("Selecione o motivo da perda.");
+            return;
+        }
+
+        salvarEstagio(oportunidadeId, "perdido", motivo);
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById("modalMotivoPerda"));
+        modal.hide();
+    });
+    
 });
+
 </script>
 {% endblock %}

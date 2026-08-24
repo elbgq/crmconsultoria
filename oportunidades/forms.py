@@ -3,7 +3,6 @@ from .models import Oportunidade
 from clientes.models import Contato
 
 class OportunidadeForm(forms.ModelForm):
-
     class Meta:
         model = Oportunidade
         fields = [
@@ -11,7 +10,7 @@ class OportunidadeForm(forms.ModelForm):
             'area', 'tipo_contrato', 'valor_estimado', 'horas_estimadas', 'valor_hora',
             'probabilidade', 'estagio', 'origem',
             'data_inicio_prevista', 'duracao_estimada_semanas', 'data_fechamento_real',
-            'motivo_perda', 'observacoes',
+            'observacoes',
         ]
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
@@ -29,7 +28,6 @@ class OportunidadeForm(forms.ModelForm):
             'data_inicio_prevista': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'duracao_estimada_semanas': forms.NumberInput(attrs={'class': 'form-control'}),
             'data_fechamento_real': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            #'motivo_perda': forms.TextInput(attrs={'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
@@ -57,13 +55,4 @@ class OportunidadeForm(forms.ModelForm):
         else:
             self.fields['contato_principal'].queryset = Contato.objects.none() # type: ignore
 
-    # Validação para garantir que motivo_perda seja preenchido se a oportunidade for "perdida"
-    def clean(self):
-        cleaned = super().clean()
-        estagio = cleaned.get('estagio')
-        motivo = cleaned.get('motivo_perda')
-
-        if estagio == 'perdido' and not motivo:
-            self.add_error('motivo_perda', 'Informe o motivo da perda.')
-
-        return cleaned
+    

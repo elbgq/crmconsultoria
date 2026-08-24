@@ -13,6 +13,7 @@ from django.views import View
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from crm_core.models import EstagioFunil
+ 
 
 
 class OportunidadeListView(LoginRequiredMixin, ListView):
@@ -93,6 +94,10 @@ class OportunidadeKanbanView(LoginRequiredMixin, TemplateView):
                 'oportunidades': [op for op in oportunidades if op.estagio == valor],
             })
         context['colunas'] = colunas
+        
+        # Adiciona os motivos de perda ao contexto para o template
+        context['motivos_perda'] = Oportunidade.MotivoPerda.choices
+        
         return context
 
 
@@ -118,27 +123,6 @@ class AtualizarEstagioView(LoginRequiredMixin, View):
             )
 
         return JsonResponse({'ok': True})
-
-# Adicionar a view de atualização (mantendo o padrão CBV, se preferir)
-class AtualizarEstagioAjaxView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        try:
-            dados = json.loads(request.body)
-            oportunidade_id = dados.get('oportunidade_id')
-            novo_estagio = dados.get('novo_estagio')
-        except (json.JSONDecodeError, AttributeError):
-            return JsonResponse({'erro': 'Dados inválidos'}, status=400)
-
-        estagios_validos = [valor for valor, _ in EstagioFunil.choices]
-        if novo_estagio not in estagios_validos:
-            return JsonResponse({'erro': 'Estágio inválido'}, status=400)
-
-        oportunidade = get_object_or_404(Oportunidade, pk=oportunidade_id)
-        oportunidade.estagio = novo_estagio
-        oportunidade.save()  # signal de HistoricoEstagio dispara aqui
-
-        return JsonResponse({'sucesso': True, 'novo_estagio': novo_estagio})
-    
 
 # Montagem do Kanban de oportunidades completo: view que agrupa por estágio,
 # template com colunas, e o drag-and-drop funcional usando SortableJS + AJAX.
@@ -173,6 +157,8 @@ def atualizar_estagio_ajax(request):
         dados = json.loads(request.body)
         oportunidade_id = dados.get('oportunidade_id')
         novo_estagio = dados.get('novo_estagio')
+        motivo_perda = dados.get('motivo_perda')
+        
     except (json.JSONDecodeError, AttributeError):
         return JsonResponse({'erro': 'Dados inválidos'}, status=400)
 
@@ -185,6 +171,9 @@ def atualizar_estagio_ajax(request):
 
     if estagio_anterior != novo_estagio:
         oportunidade.estagio = novo_estagio
+        
+        if novo_estagio == 'perdido' and motivo_perda:
+            oportunidade.motivo_perda = motivo_perda
         oportunidade.save()
 
         # CRIA O HISTÓRICO - avanço ou regresso de estágio

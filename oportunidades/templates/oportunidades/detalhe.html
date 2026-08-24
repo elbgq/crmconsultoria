@@ -25,6 +25,12 @@
     <dt class="col-sm-3">Fechamento real</dt><dd class="col-sm-9">{{ oportunidade.data_fechamento_real|default:"—" }}</dd>
     <dt class="col-sm-3">Observações</dt><dd class="col-sm-9">{{ oportunidade.observacoes|linebreaks|default:"—" }}</dd>
 </dl>
+<!-- Seção de Motivo da Perda -->
+{% if oportunidade.estagio == 'perdido' %}
+<div class="alert alert-danger mt-3">
+    <strong>Motivo da perda:</strong> {{ oportunidade.get_motivo_perda_display }}
+</div>
+{% endif %}
 
 <!-- Seção de Histórico de Estágios -->
 <h4>Histórico de estágios</h4>
