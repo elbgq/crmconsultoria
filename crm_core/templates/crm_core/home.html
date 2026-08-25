@@ -1,4 +1,11 @@
 {% extends 'base.html' %}
+
+<!-- 
+Página inicial do CRM, mostrando visão geral das empresas clientes, oportunidades e valores em negociação.
+Exibe também listas de oportunidades por estágio e últimas oportunidades cadastradas.
+-->
+{% block body_class %}home-bg{% endblock %}
+
 {% block title %}Início{% endblock %}
 {% block content %}
 <h1 class="mb-4">Visão Geral</h1>
@@ -10,7 +17,7 @@
                 <h6 class="text-muted">Empresas Clientes</h6>
                 <h2>{{ total_empresas }}</h2>
             </div>
-        </div>
+        </div> 
     </div>
     <div class="col-md-4">
         <div class="card text-center">
