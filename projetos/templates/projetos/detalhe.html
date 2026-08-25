@@ -33,36 +33,50 @@
     
     <!-- Adicionando uma seção de esclarecimento sobre entregas -->
     <div class="accordion mb-3" id="accordionEntregaInfo">
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingInfo">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
-            Esclarecimentos - Como registrar a conclusão das fases do projeto
-        </button>
-        </h2>
-        <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionEntregaInfo">
-        <div class="accordion-body">
-            <p><strong>Importante:</strong> Cada fase do projeto é representada por uma <em>Entrega</em>. Para concluir uma fase, siga estes passos:</p>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingInfo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+                    Esclarecimentos - Como registrar e concluir entregas/fases do projeto
+                </button>
+            </h2>
 
-            <ol>
-            <li>Clique no botão <strong>Editar</strong> da entrega correspondente.</li>
-            <li>Marque a opção <strong>Concluída</strong>.</li>
-            <li>Informe a <strong>Data de Entrega</strong> (data em que a fase foi finalizada).</li>
-            <li>Salve as alterações.</li>
-            </ol>
+            <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionEntregaInfo">
+                <div class="accordion-body">
 
-            <p>Ao salvar, o sistema irá automaticamente:</p>
-            <ul>
-            <li>Atualizar o <strong>progresso do projeto</strong>;</li>
-            <li>Recalcular o <strong>status automático</strong> (Em andamento, Concluído, Atrasado);</li>
-            <li>Atualizar a <strong>barra de progresso</strong>;</li>
-            <li>Remover alertas de atraso da fase (se houver).</li>
-            </ul>
+                    <p><strong>Visão geral:</strong> Cada projeto é composto por diversas <em>fases</em>, e cada fase é representada no sistema por uma <strong>Entrega</strong>. As entregas permitem acompanhar o progresso do projeto, registrar avanços, identificar atrasos e documentar a conclusão de cada etapa.</p>
 
-            <p><strong>Observação:</strong> Não crie uma nova entrega para marcar conclusão. A conclusão deve ser registrada diretamente na entrega existente.</p>
-        </div>
+                    <p><strong>Como registrar uma nova fase (Entrega):</strong></p>
+                    <ol>
+                        <li>No painel do projeto, clique em <strong>Adicionar Entrega</strong>.</li>
+                        <li>Informe o <strong>nome da fase</strong> (ex.: Diagnóstico, Planejamento, Implementação).</li>
+                        <li>Descreva brevemente o objetivo ou escopo da fase.</li>
+                        <li>Defina a <strong>data prevista</strong> para conclusão.</li>
+                        <li>Salve para registrar a nova fase do projeto.</li>
+                    </ol>
+
+                    <p><strong>Como registrar a conclusão de uma fase:</strong></p>
+                    <ol>
+                        <li>Clique no botão <strong>Editar</strong> da entrega correspondente.</li>
+                        <li>Marque a opção <strong>Concluída</strong>.</li>
+                        <li>Informe a <strong>Data de Entrega</strong> (data em que a fase foi finalizada).</li>
+                        <li>Salve as alterações.</li>
+                    </ol>
+
+                    <p>Ao salvar, o sistema irá automaticamente:</p>
+                    <ul>
+                        <li>Atualizar o <strong>progresso geral do projeto</strong>;</li>
+                        <li>Recalcular o <strong>status automático</strong> (Em andamento, Concluído, Atrasado);</li>
+                        <li>Atualizar a <strong>barra de progresso</strong> com base nas fases concluídas;</li>
+                        <li>Remover alertas de atraso da fase (se houver).</li>
+                    </ul>
+
+                    <p><strong>Observação importante:</strong> Não crie uma nova entrega para marcar a conclusão de uma fase já existente. A conclusão deve ser registrada diretamente na entrega correspondente.</p>
+
+                </div>
+            </div>
         </div>
     </div>
-    </div>
+
 
     <!-- Seção de alertas automáticos sobre entregas -->
     {% if projeto.fases_atrasadas %}
