@@ -51,7 +51,7 @@ def editar_interacao(request, pk):
             return redirect('clientes:detalhe_contato', pk=interacao.contato.pk)
     else:
         form = InteracaoForm(instance=interacao)
-
+    
     return render(request, 'interacoes/form.html', {'form': form, 'contato': interacao.contato})
 
 

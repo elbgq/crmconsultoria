@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Registrar Interação{% endblock %}
+{% block title %}Interação{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -14,10 +14,22 @@
 
     <form method="post">
         {% csrf_token %}
+
+        {# Exibe o campo contato apenas se não estiver oculto #}
+        {% if not form.contato.is_hidden %}
         <p>
             {{ form.contato.label_tag }}
             {{ form.contato }}
         </p>
+        {% endif %}
+
+        {# Exibe o campo oportunidade apenas se não estiver oculto #}
+        {% if not form.oportunidade.is_hidden %}
+        <p>
+            {{ form.oportunidade.label_tag }}
+            {{ form.oportunidade }}
+        </p>
+        {% endif %}
 
         <p>
             {{ form.tipo.label_tag }}
@@ -39,16 +51,17 @@
             {{ form.data_interacao }}
         </p>
 
-
-        {% if not view.object %}
+        {# Criação vs edição #}
+        {% if not form.instance.pk %}
             <p class="text-muted">Nova interação — data atual sugerida</p>
         {% else %}
             <p class="text-muted">
-                Data atual: {{ form.data_interacao.value|date:"d/m/Y H:i" }}
+                Data atual: {{ form.data_interacao.value }}
             </p>
         {% endif %}
 
         <button type="submit" class="btn btn-primary">Salvar</button>
+        
         {% if contato %}
             <a href="{% url 'clientes:detalhe_contato' contato.pk %}" class="btn btn-link">Cancelar</a>
         {% elif oportunidade %}
