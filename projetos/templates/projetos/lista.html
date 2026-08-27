@@ -32,7 +32,7 @@
             <tr>
                 <td>{{ projeto.nome }}</td>
                 <td>{{ projeto.oportunidade_origem.empresa_cliente }}</td>
-                <td><span class="badge bg-secondary">{{ projeto.get_status_display }}</span></td>
+                <td><span class="badge bg-{{ projeto.cor_status }}">{{ projeto.get_status_display }}</span></td>
                 <td>{{ projeto.gerente_projeto|default:"—" }}</td>
                 <td>{{ projeto.horas_consumidas }} / {{ projeto.horas_estimadas|default:"—" }}</td>
                 <td>

@@ -97,6 +97,43 @@ class ProjetoConsultoria(ModeloBase):
     def fases_concluidas(self):
         return self.entregas.filter(concluida=True) # type: ignore
 
+    def atualizar_status(self):
+        total = self.entregas.count() # type: ignore
+        concluidas = self.entregas.filter(concluida=True).count() # type: ignore
+        atrasadas = self.entregas.filter( # type: ignore
+            concluida=False,
+            data_prevista__lt=timezone.now().date()
+        ).count()
+
+        if total == 0:
+            novo_status = StatusProjeto.NAO_INICIADO
+
+        elif concluidas == total:
+            novo_status = StatusProjeto.CONCLUIDO
+
+        elif atrasadas > 0:
+            novo_status = StatusProjeto.PAUSADO  # ou "Atrasado", se você quiser criar esse status
+
+        else:
+            novo_status = StatusProjeto.EM_ANDAMENTO
+
+        # Atualiza apenas se mudou
+        if self.status != novo_status:
+            self.status = novo_status
+            self.save(update_fields=['status'])
+
+    @property
+    def cor_status(self):
+        mapa = {
+            'nao_iniciado': 'secondary',
+            'andamento': 'primary',
+            'pausado': 'warning',
+            'atrasado': 'danger',
+            'concluido': 'success',
+            'cancelado': 'secondary',
+        }
+        return mapa.get(self.status, 'secondary')
+
 
 
 class Entrega(ModeloBase):
@@ -111,7 +148,7 @@ class Entrega(ModeloBase):
     )
     concluida = models.BooleanField(default=False)
 
-    class Meta:
+    class Meta: # type: ignore
         verbose_name = "Entrega"
         verbose_name_plural = "Entregas"
         ordering = ['data_prevista']
@@ -126,3 +163,15 @@ class Entrega(ModeloBase):
             return False
         return self.data_prevista < timezone.now().date()
     
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.projeto.atualizar_status()
+    
+    @property
+    def cor_status(self):
+        if self.concluida:
+            return "success"
+        if self.atrasada:
+            return "danger"
+        return "warning"
+

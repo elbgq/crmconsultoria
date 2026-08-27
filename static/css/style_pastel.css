@@ -31,10 +31,17 @@ body {
     padding: 0.8rem 1rem;
 }
 
-.navbar-brand,
+.navbar-brand {
+    background: linear-gradient(90deg, #ff8f98d8, #ff8fb1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    /*font-weight: 600;
+    color: #FF8FA3 !important;*/
+}
 .nav-link {
     font-weight: 600;
-    color: #F2F2F2 !important; /* texto bem claro */
+    color: #f2f2f2c7 !important; /* texto bem claro */
 }
 
 /* ============================
