@@ -140,3 +140,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'crm_core:home'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+# Testes mais rápidos: hasher simples só ao rodar "manage.py test"
+import sys
+if 'test' in sys.argv:
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']

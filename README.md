@@ -74,7 +74,7 @@ Dados de exemplo: `python manage.py loaddata fixtures/oportunidade_exemplo_fixtu
 | 10 | Importação de dados legados | até 19/08 | 6–8 h | Concluída |
 | 11 | Interface, temas e usabilidade | 25/07 – 27/08 | 10–12 h | Concluída |
 | 12 | Implantação (PythonAnywhere) | até 19/08 | 4–6 h | Concluída (sem automação) |
-| 13 | Testes, qualidade e endurecimento | 08/10 | 6–8 h | Parcial (23 testes; correções aplicadas) |
+| 13 | Testes, qualidade e endurecimento | 08/10 | 6–8 h | Concluída (58 testes; correções aplicadas) |
 
 ### Fase 1 — Fundação e modelagem (≈ 8–10 h · 21/07 – 22/07)
 - Criação do projeto Django, ambiente virtual e organização em apps por domínio.
@@ -149,7 +149,7 @@ Dados de exemplo: `python manage.py loaddata fixtures/oportunidade_exemplo_fixtu
 - Endurecimento ativado quando `DEBUG=False`: redirecionamento HTTPS, cookies de sessão/CSRF seguros, `X-Frame-Options: DENY`.
 - `STATIC_ROOT` configurado para `collectstatic`.
 
-### Fase 13 — Testes, qualidade e endurecimento (≈ 6–8 h · parcial)
+### Fase 13 — Testes, qualidade e endurecimento (≈ 12–16 h · concluída)
 Ver a seção 6 (correções aplicadas e pendências).
 
 ---
@@ -177,10 +177,13 @@ Ver a seção 6 (correções aplicadas e pendências).
 - Comandos `importar_*_rodanegocios` sem caminho fixo: informe o caminho ou defina `RODANEGOCIOS_DB`.
 - `requirements.txt` sem as dependências do Flask; criado `.env.example`; comentários do `settings.py` apontam para o Django 5.2.
 
+**Segunda rodada (08/10/2026)** — 58 testes, rodando em ~2 s (hasher de senha simples só durante os testes):
+- Regra de acesso mantida: apenas o dashboard é restrito (superusuário, sócio e consultor sênior). O link "Relatórios" some do menu para quem não tem acesso.
+- Testes novos para clientes, contatos, interações, usuários/login, home e views de tarefas.
+- Bugs de **tarefas** encontrados pelos testes e corrigidos: a lista quebrava (nomes de URL sem namespace), o "Cancelar" do formulário apontava para rota inexistente, criar tarefa falhava por falta de responsável (agora é o usuário logado) e editar/concluir não voltavam para a oportunidade/projeto.
+
 **Ainda pendente**
-- Aplicar as 3 migrations novas: `python manage.py migrate` (backup feito em `db.backup.sqlite3`).
-- Permissões por cargo nas demais telas (hoje só o dashboard é restrito) e testes de views de clientes/interações.
-- Alterações de visual do Kanban (setas entre colunas, 3 colunas) seguem sem commit.
+- Aplicar restrições por cargo nas demais telas, quando a regra de quem vê o quê for definida.
 
 ## 7. Roadmap sugerido (próximas fases)
 
@@ -197,4 +200,4 @@ Ver a seção 6 (correções aplicadas e pendências).
 
 - **8 apps Django**, 9 modelos de negócio (`EmpresaCliente`, `Contato`, `Oportunidade`, `HistoricoEstagio`, `Interacao`, `ProjetoConsultoria`, `Entrega`, `Tarefa`, `Perfil`) mais um modelo base abstrato, 14 migrations, 35 rotas nos apps e 28 templates.
 - Funil comercial com Kanban, projetos gerados automaticamente, entregas com alertas de atraso, tarefas e painel gerencial.
-- Em produção no PythonAnywhere; 23 testes cobrindo oportunidades, projetos, tarefas e relatórios.
+- Em produção no PythonAnywhere; 58 testes cobrindo todos os apps.

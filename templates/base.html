@@ -23,7 +23,9 @@
                 <a class="nav-link" href="{% url 'oportunidades:lista' %}">Oportunidades</a>
                 <a class="nav-link" href="{% url 'oportunidades:kanban' %}">Kanban</a>
                 <a class="nav-link" href="{% url 'projetos:lista' %}">Projetos</a>
+                {% if user.is_superuser or user.perfil.cargo == 'socio' or user.perfil.cargo == 'consultor_senior' %}
                 <a class="nav-link" href="{% url 'relatorios:dashboard' %}">Relatórios</a>
+                {% endif %}
             </div>
             
             <div class="navbar-nav dropdown">

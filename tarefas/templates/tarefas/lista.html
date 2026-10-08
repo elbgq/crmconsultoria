@@ -43,9 +43,9 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'tarefa_editar' tarefa.pk %}" class="btn btn-sm btn-secondary">Editar</a>
+                <a href="{% url 'tarefas:tarefa_editar' tarefa.pk %}" class="btn btn-sm btn-secondary">Editar</a>
                 {% if not tarefa.concluida %}
-                <a href="{% url 'tarefa_concluir' tarefa.pk %}" class="btn btn-sm btn-success">Concluir</a>
+                <a href="{% url 'tarefas:tarefa_concluir' tarefa.pk %}" class="btn btn-sm btn-success">Concluir</a>
                 {% endif %}
             </td>
         </tr>

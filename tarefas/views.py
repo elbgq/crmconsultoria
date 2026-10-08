@@ -1,8 +1,18 @@
 from django.views.generic import ListView, CreateView, UpdateView
 from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Tarefa, Oportunidade, ProjetoConsultoria
 from .forms import TarefaForm
+
+def _url_de_retorno(tarefa):
+    """Depois de salvar, volta para a oportunidade/projeto da tarefa (ou para a lista)."""
+    if tarefa.oportunidade:
+        return reverse('oportunidades:detalhe', args=[tarefa.oportunidade.pk])
+    if tarefa.projeto:
+        return reverse('projetos:detalhe', args=[tarefa.projeto.pk])
+    return reverse('tarefas:tarefas_lista')
+
 
 class TarefaListaView(LoginRequiredMixin, ListView):
     model = Tarefa
@@ -81,14 +91,21 @@ class TarefaCreateView(LoginRequiredMixin, CreateView):
             if projeto_id:
                 form.instance.projeto = ProjetoConsultoria.objects.get(pk=projeto_id)
     
+            form.instance.responsavel = self.request.user
             return super().form_valid(form)
+
+    def get_success_url(self):
+        return _url_de_retorno(self.object)
 
 
 class TarefaUpdateView(LoginRequiredMixin, UpdateView):
     model = Tarefa
     form_class = TarefaForm
     template_name = 'tarefas/form.html'
-    
+
+    def get_success_url(self):
+        return _url_de_retorno(self.object)
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
 
@@ -123,8 +140,5 @@ def tarefa_concluir(request, pk):
     tarefa.concluida = True
     tarefa.save()
     
-    if tarefa.oportunidade:
-        return redirect('oportunidades:detalhe', pk=tarefa.oportunidade.pk)
-    else:
-        return redirect('tarefas:lista')
+    return redirect(_url_de_retorno(tarefa))
 
