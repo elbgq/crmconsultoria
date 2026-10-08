@@ -9,6 +9,7 @@ class StatusProjeto(models.TextChoices):
     NAO_INICIADO = 'nao_iniciado', 'Não Iniciado'
     EM_ANDAMENTO = 'andamento', 'Em Andamento'
     PAUSADO = 'pausado', 'Pausado'
+    ATRASADO = 'atrasado', 'Atrasado'
     CONCLUIDO = 'concluido', 'Concluído'
     CANCELADO = 'cancelado', 'Cancelado'
 
@@ -50,7 +51,7 @@ class ProjetoConsultoria(ModeloBase):
     # Propriedade que calcula o percentual de horas consumidas em relação às horas estimadas
     @property
     def percentual_horas_consumidas(self):
-        if not self.horas_estimadas:
+        if not self.horas_estimadas or self.horas_consumidas is None:
             return None
         return round((float(self.horas_consumidas) / self.horas_estimadas) * 100, 1)         # type: ignore
 
@@ -103,7 +104,7 @@ class ProjetoConsultoria(ModeloBase):
         atrasadas = self.entregas.filter( # type: ignore
             concluida=False,
             data_prevista__lt=timezone.now().date()
-        ).count()
+        ).count() 
 
         if total == 0:
             novo_status = StatusProjeto.NAO_INICIADO
@@ -112,7 +113,7 @@ class ProjetoConsultoria(ModeloBase):
             novo_status = StatusProjeto.CONCLUIDO
 
         elif atrasadas > 0:
-            novo_status = StatusProjeto.PAUSADO  # ou "Atrasado", se você quiser criar esse status
+            novo_status = StatusProjeto.ATRASADO
 
         else:
             novo_status = StatusProjeto.EM_ANDAMENTO

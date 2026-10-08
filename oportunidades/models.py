@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MaxValueValidator
 from crm_core.models import ModeloBase, EstagioFunil, TipoContrato, AreaConsultoria
 from clientes.models import EmpresaCliente, Contato
 
@@ -26,7 +27,9 @@ class Oportunidade(ModeloBase):
     horas_estimadas = models.PositiveIntegerField(null=True, blank=True)
     valor_hora = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
 
-    probabilidade = models.PositiveSmallIntegerField(default=0)
+    probabilidade = models.PositiveSmallIntegerField(
+        default=0, validators=[MaxValueValidator(100)]
+    )
     estagio = models.CharField(max_length=20, choices=EstagioFunil.choices, default=EstagioFunil.PROSPECCAO)
     origem = models.CharField(max_length=100, blank=True)
 
@@ -65,22 +68,3 @@ class HistoricoEstagio(models.Model):
 
     def __str__(self):
         return f"{self.oportunidade.titulo}: {self.estagio_anterior} → {self.estagio_novo}"
-    
-    def save(self, *args, **kwargs):
-        criando = self.pk is None  # só cria projeto na primeira gravação do histórico
-        super().save(*args, **kwargs)
-
-        # Se o novo estágio é "ganho", cria o projeto
-        if criando and self.estagio_novo == 'ganho':
-            oportunidade = self.oportunidade
-
-            # Evita duplicação
-            if not hasattr(oportunidade, 'projeto'):
-                from projetos.models import ProjetoConsultoria, StatusProjeto
-
-                ProjetoConsultoria.objects.create(
-                    oportunidade_origem=oportunidade,
-                    nome=f"Projeto — {oportunidade.titulo}",
-                    status=StatusProjeto.NAO_INICIADO,
-                    data_inicio_real=oportunidade.data_fechamento_real or None
-                )

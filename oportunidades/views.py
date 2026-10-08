@@ -49,6 +49,10 @@ class OportunidadeCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView
     success_url = reverse_lazy('oportunidades:lista')
     success_message = "Oportunidade criada com sucesso."
 
+    def form_valid(self, form):
+        form.instance._alterado_por = self.request.user
+        return super().form_valid(form)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         empresa_id = self.request.GET.get('empresa_cliente') or self.request.POST.get('empresa_cliente')
@@ -67,6 +71,10 @@ class OportunidadeUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView
     template_name = 'oportunidades/formulario.html'
     success_url = reverse_lazy('oportunidades:lista')
     success_message = "Oportunidade atualizada com sucesso."
+
+    def form_valid(self, form):
+        form.instance._alterado_por = self.request.user
+        return super().form_valid(form)
 
     def get_form_kwargs(self):
             kwargs = super().get_form_kwargs() # type: ignore
@@ -110,45 +118,13 @@ class AtualizarEstagioView(LoginRequiredMixin, View):
         if novo_estagio not in EstagioFunil.values:
             return JsonResponse({'erro': 'Estágio inválido'}, status=400)
 
-        estagio_anterior = oportunidade.estagio
-        if estagio_anterior != novo_estagio:
+        if oportunidade.estagio != novo_estagio:
             oportunidade.estagio = novo_estagio
+            # O histórico é gravado pelo signal (oportunidades/signals.py)
+            oportunidade._alterado_por = request.user
             oportunidade.save(update_fields=['estagio'])
 
-            HistoricoEstagio.objects.create(
-                oportunidade=oportunidade,
-                estagio_anterior=estagio_anterior,
-                estagio_novo=novo_estagio,
-                alterado_por=request.user if request.user.is_authenticated else None,
-            )
-
         return JsonResponse({'ok': True})
-
-# Montagem do Kanban de oportunidades completo: view que agrupa por estágio,
-# template com colunas, e o drag-and-drop funcional usando SortableJS + AJAX.
-# oportunidades/views.py (adicionar a estas views existentes)
-
-@login_required
-def kanban_oportunidades(request):
-    colunas = []
-    for valor, label in EstagioFunil.choices:
-        if valor in ('ganho', 'perdido'):
-            continue  # opcional: manter fora do board ativo, ou incluir se preferir
-        oportunidades = (
-            Oportunidade.objects
-            .filter(estagio=valor)
-            .select_related('empresa_cliente', 'consultor_responsavel')
-        )
-        colunas.append({
-            'valor': valor,
-            'label': label,
-            'oportunidades': oportunidades,
-            'total_valor': sum(o.valor_estimado for o in oportunidades),
-        })
-
-    contexto = {'colunas': colunas}
-    return render(request, 'oportunidades/kanban.html', contexto)
-
 
 @require_POST
 @login_required
@@ -167,21 +143,15 @@ def atualizar_estagio_ajax(request):
         return JsonResponse({'erro': 'Estágio inválido'}, status=400)
 
     oportunidade = get_object_or_404(Oportunidade, pk=oportunidade_id)
-    estagio_anterior = oportunidade.estagio
 
-    if estagio_anterior != novo_estagio:
+    if oportunidade.estagio != novo_estagio:
         oportunidade.estagio = novo_estagio
-        
+
         if novo_estagio == 'perdido' and motivo_perda:
             oportunidade.motivo_perda = motivo_perda
-        oportunidade.save()
 
-        # CRIA O HISTÓRICO - avanço ou regresso de estágio
-        HistoricoEstagio.objects.create(
-            oportunidade=oportunidade,
-            estagio_anterior=estagio_anterior,
-            estagio_novo=novo_estagio,
-            alterado_por=request.user
-        )
+        # O histórico é gravado pelo signal (oportunidades/signals.py)
+        oportunidade._alterado_por = request.user
+        oportunidade.save()
 
     return JsonResponse({'sucesso': True, 'novo_estagio': novo_estagio})

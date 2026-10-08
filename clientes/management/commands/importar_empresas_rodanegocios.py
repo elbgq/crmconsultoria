@@ -1,3 +1,4 @@
+import os
 import sqlite3
 
 from django.core.management.base import BaseCommand, CommandError
@@ -16,7 +17,7 @@ class Command(BaseCommand):
             "caminho_db",
             type=str,
             nargs="?",
-            default=r"D:\DATA\Aplicativos\Santos\rodanegocios\db.sqlite3",
+            default=os.environ.get("RODANEGOCIOS_DB"),
             help="Caminho completo para o db.sqlite3 do projeto rodanegocios",
         )
         parser.add_argument(
@@ -27,6 +28,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         caminho = options["caminho_db"]
+        if not caminho:
+            raise CommandError(
+                "Informe o caminho do db.sqlite3 de origem ou defina a variável "
+                "de ambiente RODANEGOCIOS_DB."
+            )
         dry_run = options["dry_run"]
 
         try:

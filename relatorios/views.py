@@ -1,11 +1,11 @@
 # relatorios/views.py
 import json
-from django.contrib.auth.decorators import login_required
+from usuarios.permissions import cargo_minimo_senior_required
 from django.shortcuts import render
 from . import services
  
 
-@login_required
+@cargo_minimo_senior_required
 def dashboard(request):
     funil = list(services.funil_de_vendas())
     conversao = list(services.conversao_por_consultor())

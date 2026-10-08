@@ -88,11 +88,11 @@ def editar_entrega(request, projeto_pk, entrega_pk):
     else:
         form = EntregaForm(instance=entrega)
     return render(request, 'projetos/entrega_form.html', {'form': form, 'projeto': entrega.projeto})
-
+ 
 # Para o botão de concluir uma entrega/fase.
 def concluir_entrega(request, entrega_id):
     entrega = get_object_or_404(Entrega, id=entrega_id)
     entrega.concluida = True
     entrega.data_entregue = timezone.now().date()
     entrega.save()
-    return redirect('projetos:detalhe', pk=entrega.projeto.id)
+    return redirect('projetos:detalhe', pk=entrega.projeto.id) # type: ignore

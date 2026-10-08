@@ -11,7 +11,8 @@ def criar_projeto_ao_ganhar(sender, instance, **kwargs):
     if instance.estagio == 'ganho' and not hasattr(instance, 'projeto'):
         ProjetoConsultoria.objects.create(
             oportunidade_origem=instance,
-            nome=instance.titulo,
+            nome=f"Projeto — {instance.titulo}",
             horas_estimadas=instance.horas_estimadas,
+            data_inicio_real=instance.data_fechamento_real,
         )
-    
+    

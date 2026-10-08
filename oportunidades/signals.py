@@ -23,8 +23,18 @@ from django.db.models.signals import post_save
 @receiver(post_save, sender=Oportunidade)
 def salvar_historico(sender, instance, created, **kwargs):
     if created:
-        HistoricoEstagio.objects.create(estagio_anterior=None, estagio_novo=instance.estagio, oportunidade=instance)
+        HistoricoEstagio.objects.create(
+            estagio_anterior=None,
+            estagio_novo=instance.estagio,
+            oportunidade=instance,
+            alterado_por=getattr(instance, '_alterado_por', None),
+        )
     elif hasattr(instance, '_estagio_mudou'):
         anterior, novo = instance._estagio_mudou
-        HistoricoEstagio.objects.create(estagio_anterior=anterior, estagio_novo=novo, oportunidade=instance)
-        
+        HistoricoEstagio.objects.create(
+            estagio_anterior=anterior,
+            estagio_novo=novo,
+            oportunidade=instance,
+            alterado_por=getattr(instance, '_alterado_por', None),
+        )
+        
