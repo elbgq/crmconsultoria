@@ -207,6 +207,10 @@ class LancamentoHoras(ModeloBase):
         max_digits=5, decimal_places=2,
         validators=[MinValueValidator(Decimal('0.25')), MaxValueValidator(Decimal('24'))],
     )
+    entrega = models.ForeignKey(
+        Entrega, on_delete=models.SET_NULL, null=True, blank=True, related_name='lancamentos',
+        verbose_name='Fase (entrega)',
+    )
     descricao = models.CharField(max_length=200, blank=True)
 
     class Meta: # type: ignore
@@ -224,3 +228,6 @@ class LancamentoHoras(ModeloBase):
     def clean(self):
         if self.data and self.data > timezone.localdate():
             raise ValidationError({'data': 'Não é possível lançar horas em data futura.'})
+        # projeto_id ainda é None na validação do formulário (o projeto é atribuído depois)
+        if self.entrega_id and self.projeto_id and self.entrega.projeto_id != self.projeto_id:
+            raise ValidationError({'entrega': 'A fase escolhida não pertence a este projeto.'})

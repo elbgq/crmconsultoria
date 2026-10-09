@@ -32,8 +32,8 @@ def lista_projetos(request):
 @login_required
 def detalhe_projeto(request, pk):
     projeto = get_object_or_404(ProjetoConsultoria, pk=pk)
-    entregas = projeto.entregas.all() # type: ignore
-    lancamentos = list(projeto.lancamentos.select_related('usuario'))  # type: ignore
+    entregas = projeto.entregas.annotate(total_horas=Sum('lancamentos__horas')) # type: ignore
+    lancamentos = list(projeto.lancamentos.select_related('usuario', 'entrega'))  # type: ignore
     for l in lancamentos:
         l.pode_gerir = _pode_gerir_lancamento(request.user, l)
     horas_por_consultor = (
@@ -126,7 +126,7 @@ def _pode_gerir_lancamento(user, lancamento):
 def lancar_horas(request, projeto_pk):
     projeto = get_object_or_404(ProjetoConsultoria, pk=projeto_pk)
     if request.method == 'POST':
-        form = LancamentoHorasForm(request.POST)
+        form = LancamentoHorasForm(request.POST, projeto=projeto)
         if form.is_valid():
             lancamento = form.save(commit=False)
             lancamento.projeto = projeto
@@ -135,7 +135,7 @@ def lancar_horas(request, projeto_pk):
             messages.success(request, 'Horas lançadas.')
             return redirect('projetos:detalhe', pk=projeto.pk)
     else:
-        form = LancamentoHorasForm()
+        form = LancamentoHorasForm(projeto=projeto)
     return render(request, 'projetos/horas_form.html', {'form': form, 'projeto': projeto})
 
 
@@ -145,13 +145,13 @@ def editar_horas(request, pk):
     if not _pode_gerir_lancamento(request.user, lancamento):
         raise PermissionDenied
     if request.method == 'POST':
-        form = LancamentoHorasForm(request.POST, instance=lancamento)
+        form = LancamentoHorasForm(request.POST, instance=lancamento, projeto=lancamento.projeto)
         if form.is_valid():
             form.save()
             messages.success(request, 'Lançamento atualizado.')
             return redirect('projetos:detalhe', pk=lancamento.projeto_id) # type: ignore
     else:
-        form = LancamentoHorasForm(instance=lancamento)
+        form = LancamentoHorasForm(instance=lancamento, projeto=lancamento.projeto)
     return render(request, 'projetos/horas_form.html', {'form': form, 'projeto': lancamento.projeto})
 
 

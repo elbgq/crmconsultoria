@@ -153,10 +153,11 @@ Dados de exemplo: `python manage.py loaddata fixtures/oportunidade_exemplo_fixtu
 ### Fase 15 — Lançamento de horas (≈ 10–14 h · 09/10)
 - Modelo `LancamentoHoras` (projeto, consultor, data, horas de 0,25 a 24, descrição); não aceita data futura.
 - `horas_consumidas` do projeto deixou de ser digitado: é a **soma dos lançamentos**, recalculada por signal a cada criação, edição ou exclusão. O campo saiu do formulário do projeto e é somente leitura no Admin.
+- **Fase opcional:** o lançamento pode indicar a Entrega (fase) do próprio projeto; sem fase, vale para o projeto como um todo. Excluir a fase não apaga as horas. O detalhe do projeto mostra as horas por fase (coluna na tabela de entregas).
 - Telas: lançar, editar e excluir horas, no detalhe do projeto, com total por consultor.
 - Regra de acesso: qualquer usuário logado lança horas (sempre em seu nome); edita ou exclui só os próprios lançamentos — superusuário, sócio e consultor sênior gerenciam todos.
 - Migração de dados (`projetos/0005`): horas já digitadas à mão viram lançamentos "Saldo anterior" (em blocos de até 24 h), preservando o total.
-- A margem do dashboard passa a refletir horas reais. 69 testes no total.
+- A margem do dashboard passa a refletir horas reais. 76 testes no total.
 
 ### Fase 13 — Testes, qualidade e endurecimento (≈ 12–16 h · concluída)
 Ver a seção 6 (correções aplicadas e pendências).
@@ -208,4 +209,4 @@ Ver a seção 6 (correções aplicadas e pendências).
 
 - **8 apps Django**, 9 modelos de negócio (`EmpresaCliente`, `Contato`, `Oportunidade`, `HistoricoEstagio`, `Interacao`, `ProjetoConsultoria`, `Entrega`, `Tarefa`, `Perfil`) mais um modelo base abstrato, 14 migrations, 35 rotas nos apps e 28 templates.
 - Funil comercial com Kanban, projetos gerados automaticamente, entregas com alertas de atraso, tarefas e painel gerencial.
-- Em produção no PythonAnywhere; 69 testes cobrindo todos os apps.
+- Em produção no PythonAnywhere; 76 testes cobrindo todos os apps.

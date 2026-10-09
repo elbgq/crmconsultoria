@@ -45,7 +45,9 @@ class ProjetoStatusTests(TestCase):
         self.assertEqual(self.projeto.progresso, 100)
 
 
-class LancamentoHorasTests(TestCase):
+class LancamentoBase(TestCase):
+    """Preparação e helpers comuns aos testes de lançamento de horas."""
+
     def setUp(self):
         self.ana = User.objects.create_user('ana', password='x')
         self.beto = User.objects.create_user('beto', password='x')
@@ -65,6 +67,8 @@ class LancamentoHorasTests(TestCase):
         return LancamentoHoras.objects.create(projeto=self.projeto, usuario=usuario, data=self.hoje,
                                               horas=Decimal(horas), **extra)
 
+
+class LancamentoHorasTests(LancamentoBase):
     def test_lancar_define_usuario_e_atualiza_horas_do_projeto(self):
         resp = self.lancar('2.5')
         self.assertRedirects(resp, reverse('projetos:detalhe', args=[self.projeto.pk]))
@@ -143,3 +147,64 @@ class LancamentoHorasTests(TestCase):
     def test_formulario_do_projeto_nao_edita_horas_consumidas(self):
         resp = self.client.get(reverse('projetos:editar_projeto', args=[self.projeto.pk]))
         self.assertNotIn('horas_consumidas', resp.context['form'].fields)
+
+
+class LancamentoPorFaseTests(LancamentoBase):
+    def setUp(self):
+        super().setUp()
+        self.fase = Entrega.objects.create(projeto=self.projeto, nome='Diagnóstico', data_prevista=self.hoje)
+        outro = ProjetoConsultoria.objects.create(
+            oportunidade_origem=criar_oportunidade(self.ana), nome='Outro',
+        )
+        self.fase_alheia = Entrega.objects.create(projeto=outro, nome='Fase alheia', data_prevista=self.hoje)
+
+    def dados(self, **extra):
+        d = {'data': self.hoje.isoformat(), 'horas': '2', 'descricao': ''}
+        d.update(extra)
+        return d
+
+    def url(self):
+        return reverse('projetos:lancar_horas', args=[self.projeto.pk])
+
+    def test_fase_e_opcional(self):
+        self.client.post(self.url(), self.dados())
+        self.assertIsNone(LancamentoHoras.objects.get().entrega)
+
+    def test_lancar_horas_em_uma_fase(self):
+        self.client.post(self.url(), self.dados(entrega=self.fase.pk, horas='3'))
+        self.assertEqual(LancamentoHoras.objects.get().entrega, self.fase)
+        self.projeto.refresh_from_db()
+        self.assertEqual(self.projeto.horas_consumidas, Decimal('3'))
+
+    def test_fase_de_outro_projeto_e_rejeitada(self):
+        resp = self.client.post(self.url(), self.dados(entrega=self.fase_alheia.pk))
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(LancamentoHoras.objects.exists())
+
+    def test_formulario_lista_so_fases_do_projeto(self):
+        form = self.client.get(self.url()).context['form']
+        self.assertEqual(list(form.fields['entrega'].queryset), [self.fase])
+
+    def test_detalhe_mostra_horas_por_fase(self):
+        LancamentoHoras.objects.create(projeto=self.projeto, usuario=self.ana, data=self.hoje,
+                                       horas=Decimal('2'), entrega=self.fase)
+        LancamentoHoras.objects.create(projeto=self.projeto, usuario=self.ana, data=self.hoje,
+                                       horas=Decimal('1.5'), entrega=self.fase)
+        entregas = list(self.client.get(reverse('projetos:detalhe', args=[self.projeto.pk])).context['entregas'])
+        self.assertEqual(entregas[0].total_horas, Decimal('3.5'))
+
+    def test_excluir_fase_preserva_horas(self):
+        l = LancamentoHoras.objects.create(projeto=self.projeto, usuario=self.ana, data=self.hoje,
+                                           horas=Decimal('2'), entrega=self.fase)
+        self.fase.delete()
+        l.refresh_from_db()
+        self.assertIsNone(l.entrega)
+        self.projeto.refresh_from_db()
+        self.assertEqual(self.projeto.horas_consumidas, Decimal('2'))
+
+    def test_clean_do_modelo_rejeita_fase_de_outro_projeto(self):
+        from django.core.exceptions import ValidationError
+        l = LancamentoHoras(projeto=self.projeto, usuario=self.ana, data=self.hoje,
+                            horas=Decimal('1'), entrega=self.fase_alheia)
+        with self.assertRaises(ValidationError):
+            l.full_clean()

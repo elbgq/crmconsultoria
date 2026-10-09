@@ -41,13 +41,18 @@ class EntregaForm(forms.ModelForm):
 class LancamentoHorasForm(forms.ModelForm):
     class Meta:
         model = LancamentoHoras
-        fields = ['data', 'horas', 'descricao']
+        fields = ['data', 'horas', 'entrega', 'descricao']
         widgets = {
             'data': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
             'horas': forms.NumberInput(attrs={'step': '0.25', 'min': '0.25', 'max': '24'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, projeto=None, **kwargs):
         super().__init__(*args, **kwargs)
+        # A fase é opcional e só pode ser uma entrega do próprio projeto
+        self.fields['entrega'].queryset = (  # type: ignore
+            projeto.entregas.all() if projeto else Entrega.objects.none()
+        )
+        self.fields['entrega'].empty_label = 'Projeto como um todo (sem fase)'  # type: ignore
         self.fields['data'].input_formats = ['%Y-%m-%d', '%d/%m/%Y']  # type: ignore
         self.fields['data'].widget.attrs['max'] = timezone.localdate().isoformat()
