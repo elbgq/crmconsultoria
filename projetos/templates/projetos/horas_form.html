@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Lançar horas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Horas — {{ projeto.nome }}</h1>
+    <p class="text-muted">As horas lançadas somam-se automaticamente ao consumo do projeto (e à margem nos relatórios).</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'projetos:detalhe' projeto.pk %}" class="btn btn-link">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

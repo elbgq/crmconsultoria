@@ -11,4 +11,9 @@ urlpatterns = [
     path('<int:projeto_pk>/entregas/adicionar/', views.adicionar_entrega, name='adicionar_entrega'),
     path('<int:projeto_pk>/entregas/<int:entrega_pk>/editar/', views.editar_entrega, name='editar_entrega'),
     path('entregas/<int:entrega_id>/concluir/', views.concluir_entrega, name='concluir_entrega'),
+
+    # Lançamento de horas
+    path('<int:projeto_pk>/horas/lancar/', views.lancar_horas, name='lancar_horas'),
+    path('horas/<int:pk>/editar/', views.editar_horas, name='editar_horas'),
+    path('horas/<int:pk>/excluir/', views.excluir_horas, name='excluir_horas'),
 ]

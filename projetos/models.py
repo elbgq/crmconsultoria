@@ -1,4 +1,9 @@
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import Sum
 from django.conf import settings
 from crm_core.models import ModeloBase
 from oportunidades.models import Oportunidade
@@ -123,6 +128,11 @@ class ProjetoConsultoria(ModeloBase):
             self.status = novo_status
             self.save(update_fields=['status'])
 
+    def recalcular_horas(self):
+        """Atualiza horas_consumidas com a soma dos lançamentos de horas."""
+        recalcular_horas_projeto(self.pk)
+        self.refresh_from_db(fields=['horas_consumidas'])
+
     @property
     def cor_status(self):
         mapa = {
@@ -176,3 +186,41 @@ class Entrega(ModeloBase):
             return "danger"
         return "warning"
 
+
+def recalcular_horas_projeto(projeto_id):
+    """Grava em horas_consumidas a soma dos lançamentos do projeto (0 quando não há nenhum)."""
+    total = (
+        LancamentoHoras.objects.filter(projeto_id=projeto_id)
+        .aggregate(total=Sum('horas'))['total'] or Decimal('0')
+    )
+    ProjetoConsultoria.objects.filter(pk=projeto_id).update(horas_consumidas=total)
+
+
+class LancamentoHoras(ModeloBase):
+    """Horas trabalhadas por um consultor em um projeto (alimentam horas_consumidas e a margem)."""
+    projeto = models.ForeignKey(ProjetoConsultoria, on_delete=models.CASCADE, related_name='lancamentos')
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='lancamentos_horas'
+    )
+    data = models.DateField(default=timezone.localdate)
+    horas = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.25')), MaxValueValidator(Decimal('24'))],
+    )
+    descricao = models.CharField(max_length=200, blank=True)
+
+    class Meta: # type: ignore
+        verbose_name = "Lançamento de Horas"
+        verbose_name_plural = "Lançamentos de Horas"
+        ordering = ['-data', '-criado_em']
+        indexes = [
+            models.Index(fields=['projeto', 'data']),
+            models.Index(fields=['usuario', 'data']),
+        ]
+
+    def __str__(self):
+        return f"{self.horas}h — {self.projeto.nome} ({self.data:%d/%m/%Y})"
+
+    def clean(self):
+        if self.data and self.data > timezone.localdate():
+            raise ValidationError({'data': 'Não é possível lançar horas em data futura.'})

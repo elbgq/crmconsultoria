@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Excluir lançamento{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Excluir lançamento de horas</h1>
+    <p>Excluir <strong>{{ lancamento.horas }}h</strong> de {{ lancamento.data|date:"d/m/Y" }} em <strong>{{ lancamento.projeto.nome }}</strong>? O consumo do projeto será recalculado.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{% url 'projetos:detalhe' lancamento.projeto_id %}" class="btn btn-link">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

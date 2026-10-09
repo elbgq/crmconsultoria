@@ -17,7 +17,7 @@
         <div class="col-md-4"><strong>Gerente:</strong> {{ projeto.gerente_projeto|default:"—" }}</div>
         <div class="col-md-4"><strong>Início real:</strong> {{ projeto.data_inicio_real|default:"—" }}</div>
         <div class="col-md-4"><strong>Fim previsto:</strong> {{ projeto.data_fim_prevista|default:"—" }}</div>
-        <div class="col-md-4"><strong>Horas:</strong> {{ projeto.horas_consumidas }} / {{ projeto.horas_estimadas|default:"—" }}
+        <div class="col-md-4"><strong>Horas:</strong> {{ projeto.horas_consumidas|default:"0" }} / {{ projeto.horas_estimadas|default:"—" }}
             {% if projeto.percentual_horas_consumidas %} ({{ projeto.percentual_horas_consumidas }}%){% endif %}
         </div>
     </div>
@@ -148,6 +148,40 @@
         </div>
     </div>
 
+
+    <!-- Seção de horas lançadas -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h4>Horas lançadas</h4>
+        <a href="{% url 'projetos:lancar_horas' projeto.pk %}" class="btn btn-sm btn-primary">+ Lançar horas</a>
+    </div>
+    {% if horas_por_consultor %}
+    <p class="text-muted mb-2">
+        {% for h in horas_por_consultor %}{{ h.usuario__first_name|default:h.usuario__username|default:"Sem consultor" }}: <strong>{{ h.total }}h</strong>{% if not forloop.last %} · {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+    <table class="table table-sm">
+        <thead>
+            <tr><th>Data</th><th>Consultor</th><th>Horas</th><th>Descrição</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for l in lancamentos %}
+            <tr>
+                <td>{{ l.data|date:"d/m/Y" }}</td>
+                <td>{{ l.usuario.get_full_name|default:l.usuario.username|default:"—" }}</td>
+                <td>{{ l.horas }}h</td>
+                <td>{{ l.descricao|default:"—" }}</td>
+                <td>
+                    {% if l.pode_gerir %}
+                    <a href="{% url 'projetos:editar_horas' l.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                    <a href="{% url 'projetos:excluir_horas' l.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">Nenhuma hora lançada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <a href="{% url 'projetos:lista' %}" class="btn btn-link">← Voltar para lista</a>
 </div>

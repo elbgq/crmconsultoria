@@ -74,6 +74,7 @@ Dados de exemplo: `python manage.py loaddata fixtures/oportunidade_exemplo_fixtu
 | 10 | Importação de dados legados | até 19/08 | 6–8 h | Concluída |
 | 11 | Interface, temas e usabilidade | 25/07 – 27/08 | 10–12 h | Concluída |
 | 12 | Implantação (PythonAnywhere) | até 19/08 | 4–6 h | Concluída (sem automação) |
+| 15 | Lançamento de horas | 09/10 | 10–14 h | Concluída |
 | 13 | Testes, qualidade e endurecimento | 08/10 | 6–8 h | Concluída (58 testes; correções aplicadas) |
 
 ### Fase 1 — Fundação e modelagem (≈ 8–10 h · 21/07 – 22/07)
@@ -149,6 +150,14 @@ Dados de exemplo: `python manage.py loaddata fixtures/oportunidade_exemplo_fixtu
 - Endurecimento ativado quando `DEBUG=False`: redirecionamento HTTPS, cookies de sessão/CSRF seguros, `X-Frame-Options: DENY`.
 - `STATIC_ROOT` configurado para `collectstatic`.
 
+### Fase 15 — Lançamento de horas (≈ 10–14 h · 09/10)
+- Modelo `LancamentoHoras` (projeto, consultor, data, horas de 0,25 a 24, descrição); não aceita data futura.
+- `horas_consumidas` do projeto deixou de ser digitado: é a **soma dos lançamentos**, recalculada por signal a cada criação, edição ou exclusão. O campo saiu do formulário do projeto e é somente leitura no Admin.
+- Telas: lançar, editar e excluir horas, no detalhe do projeto, com total por consultor.
+- Regra de acesso: qualquer usuário logado lança horas (sempre em seu nome); edita ou exclui só os próprios lançamentos — superusuário, sócio e consultor sênior gerenciam todos.
+- Migração de dados (`projetos/0005`): horas já digitadas à mão viram lançamentos "Saldo anterior" (em blocos de até 24 h), preservando o total.
+- A margem do dashboard passa a refletir horas reais. 69 testes no total.
+
 ### Fase 13 — Testes, qualidade e endurecimento (≈ 12–16 h · concluída)
 Ver a seção 6 (correções aplicadas e pendências).
 
@@ -191,7 +200,6 @@ Ver a seção 6 (correções aplicadas e pendências).
 |---|---|---|
 | 13 — Testes e correções | Testes de modelos, signals, views e serviços; corrigir os defeitos acima; unificar o histórico de estágio e a criação de projeto | 20–30 h |
 | 14 — Permissões por cargo | Aplicar `eh_socio`/`eh_consultor_senior_ou_socio` nas views; consultor vê só o que é seu | 8–10 h |
-| 15 — Lançamento de horas | Registro de horas por usuário/projeto alimentando `horas_consumidas` e a margem | 10–14 h |
 | 16 — Filtros e exportação | Filtros por período/consultor nos relatórios e exportação CSV/PDF | 8–12 h |
 | 17 — Agenda e alertas | Lembretes de tarefas e entregas, e-mails de aviso | 10–14 h |
 | 18 — Banco e deploy | Migrar para PostgreSQL, backup automático, `.env.example`, roteiro de deploy | 6–8 h |
@@ -200,4 +208,4 @@ Ver a seção 6 (correções aplicadas e pendências).
 
 - **8 apps Django**, 9 modelos de negócio (`EmpresaCliente`, `Contato`, `Oportunidade`, `HistoricoEstagio`, `Interacao`, `ProjetoConsultoria`, `Entrega`, `Tarefa`, `Perfil`) mais um modelo base abstrato, 14 migrations, 35 rotas nos apps e 28 templates.
 - Funil comercial com Kanban, projetos gerados automaticamente, entregas com alertas de atraso, tarefas e painel gerencial.
-- Em produção no PythonAnywhere; 58 testes cobrindo todos os apps.
+- Em produção no PythonAnywhere; 69 testes cobrindo todos os apps.

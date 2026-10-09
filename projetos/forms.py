@@ -1,5 +1,7 @@
 from django import forms
-from .models import ProjetoConsultoria, Entrega
+from django.utils import timezone
+
+from .models import ProjetoConsultoria, Entrega, LancamentoHoras
 
 
 class ProjetoConsultoriaForm(forms.ModelForm):
@@ -8,7 +10,7 @@ class ProjetoConsultoriaForm(forms.ModelForm):
         fields = [
             'nome', 'status', 'equipe', 'gerente_projeto',
             'data_inicio_real', 'data_fim_prevista', 'data_fim_real',
-            'horas_estimadas', 'horas_consumidas', 'observacoes',
+            'horas_estimadas', 'observacoes',
         ]
         widgets = {
             'data_inicio_real': forms.DateInput(attrs={'type': 'date'}),
@@ -34,3 +36,18 @@ class EntregaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['data_prevista'].input_formats = ['%Y-%m-%d', '%Y-%m-%dT%H:%M'] # type: ignore
         self.fields['data_entregue'].input_formats = ['%Y-%m-%d', '%Y-%m-%dT%H:%M'] # type: ignore
+
+
+class LancamentoHorasForm(forms.ModelForm):
+    class Meta:
+        model = LancamentoHoras
+        fields = ['data', 'horas', 'descricao']
+        widgets = {
+            'data': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+            'horas': forms.NumberInput(attrs={'step': '0.25', 'min': '0.25', 'max': '24'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['data'].input_formats = ['%Y-%m-%d', '%d/%m/%Y']  # type: ignore
+        self.fields['data'].widget.attrs['max'] = timezone.localdate().isoformat()
